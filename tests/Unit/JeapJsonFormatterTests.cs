@@ -1,9 +1,12 @@
+using System.Collections.Frozen;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using FluentAssertions.Json;
 using JsonConsoleFormatters;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using Unit.Infrastructure;
 using Xunit.Abstractions;
 
@@ -11,6 +14,35 @@ namespace Unit;
 
 public class JeapJsonFormatterTests : FormatterTestsBase<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions>
 {
+    
+    
+    protected readonly Spec _spec = new();
+    
+    public class Spec
+    {
+        public string ElementNameTimestamp { get; } = "@timestamp";
+        public string ElementNameLogLevel { get; } = "level";
+        public string ElementNameMessage { get; } = "message";
+        public string ElementNameException { get; } = "exception";
+        public string ElementNameCategory { get; } = "logger";
+        public string ElementNameEventId { get; } = "eventId";
+        
+        public string ElementNameEventName { get; } = "eventName";
+       
+        public string ElementNameThreadName { get; } = "thread_name";
+        
+        public IReadOnlyDictionary<LogLevel, string> LogLevelStrings { get; } = new Dictionary<LogLevel, string>
+        {
+            // TODO: check against otel
+            [LogLevel.Trace] = "TRACE",
+            [LogLevel.Debug] = "DEBUG",
+            [LogLevel.Information] = "INFO",
+            [LogLevel.Warning] = "WARN",
+            [LogLevel.Error] = "ERROR",
+            [LogLevel.Critical] = "ERROR"
+        }.ToFrozenDictionary();
+    }
+
     public JeapJsonFormatterTests(ITestOutputHelper testOutputHelper) : base(FakeLoggerBuilder.JeapJson(),
         testOutputHelper)
     {
@@ -38,23 +70,42 @@ public class JeapJsonFormatterTests : FormatterTestsBase<JeapJsonConsoleFormatte
                 };
             })
             .Build();
-        var expectedElementName = "Timestamp";
-        var expectedTimestamp =
-            useUtcTimeStamp ? C.ExpectedDefaultTimestampStringUtc : C.ExpectedDefaultTimestampStringLocal;
+        
         var expected = $"""
-                        "{expectedElementName}":"{expectedTimestamp}"
+                        "{_spec.ElementNameTimestamp}":"{(useUtcTimeStamp ? C.ExpectedDefaultTimestampStringUtc : C.ExpectedDefaultTimestampStringLocal)}"
                         """;
-
-        TestOutputHelper.WriteLine($"UTC:   {C.DefaultStartTimestamp.ToUniversalTime():O}");
-        TestOutputHelper.WriteLine($"Local: {C.DefaultStartTimestamp.ToLocalTime():O}");
-        TestOutputHelper.WriteLine($"Expected: {expected}");
-
-
+        
         // Act
         logger.LogInformation("Hi!");
 
         // Assert
         logger.Formatted.Should().BeValidJson();
         logger.Formatted.Should().Contain(expected);
+    }
+
+    [Fact]
+    public void Log_UsesCorrectStandardElementNames()
+    {
+        // Arrange
+        var logger = LoggerBuilder.With(o => o.IncludeEventId = true).Build();
+        var ex = new Exception("Test exception");
+        
+        // Act
+        logger.LogInformation(new EventId(41,"FortyTwo"), ex, "Hi!");
+        
+        // Assert
+        logger.Formatted.Should().BeValidJson();
+        
+        using var _ = new AssertionScope();
+
+        var log = JToken.Parse(logger.Formatted!);
+        
+        log.Should().HaveElement(_spec.ElementNameLogLevel);
+        log.Should().HaveElement(_spec.ElementNameMessage);
+        log.Should().HaveElement(_spec.ElementNameException);
+        log.Should().HaveElement(_spec.ElementNameCategory);
+        log.Should().HaveElement(_spec.ElementNameEventId);
+        log.Should().HaveElement(_spec.ElementNameEventName);
+      
     }
 }

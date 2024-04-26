@@ -20,10 +20,6 @@ public class JeapJsonConsoleFormatterOptions : JsonConsoleFormatterOptions
         IncludeScopes = true;
     }
 
-    /// <summary>
-    ///     If true, the logged category will only include characters after the last '.'. Defaults to false.
-    /// </summary>
-    public bool TruncateCategory { get; set; }
 
     /// <summary>
     ///     Whether to include the seldom used EventId field. Defaults to false

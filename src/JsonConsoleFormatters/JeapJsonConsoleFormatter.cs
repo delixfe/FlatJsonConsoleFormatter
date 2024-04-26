@@ -40,10 +40,6 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
             return;
         }
 
-        var logLevel = logEntry.LogLevel;
-        var category = logEntry.Category;
-        var eventId = logEntry.EventId.Id;
-        var exception = logEntry.Exception;
         const int DefaultBufferSize = 1024;
         using (var output = new PooledByteBufferWriter(DefaultBufferSize))
         {
@@ -54,27 +50,24 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
                 writer.WriteStartObject();
 
                 // we ignore the TimestampFormat option, one could check for TimestampFormat == "O"
-                writer.WriteString("Timestamp",
+                writer.WriteString("@timestamp"u8,
                     FormatterOptions.UseUtcTimestamp ? TimeProvider.GetUtcNow() : TimeProvider.GetLocalNow());
+                
+                writer.WriteString("level"u8, GetLogLevelString(logEntry.LogLevel));
 
+                writer.WriteString("logger"u8, logEntry.Category);
+                
+                writer.WriteString("message"u8, message);
+                
+                
                 if (FormatterOptions.IncludeEventId)
-                    AddMessageProperty(messageProperties, nameof(logEntry.EventId), eventId);
-                AddMessageProperty(messageProperties, nameof(logEntry.LogLevel), GetLogLevelString(logLevel));
-                if (FormatterOptions.TruncateCategory)
-                {
-                    var cat = logEntry.Category;
-                    var i = cat.LastIndexOf('.');
-                    if (i > 0)
-                        cat = cat.Substring(i + 1);
-                    AddMessageProperty(messageProperties, nameof(logEntry.Category), cat);
-                }
-                else
-                    AddMessageProperty(messageProperties, nameof(logEntry.Category), category);
-
-                AddMessageProperty(messageProperties, "Message", message);
-
-                if (exception != null)
-                    AddMessageProperty(messageProperties, nameof(Exception), exception.ToString());
+                    writer.WriteNumber("eventId"u8, logEntry.EventId.Id);
+                
+                if (FormatterOptions.IncludeEventId && logEntry.EventId.Name is not null)
+                    writer.WriteString("eventName"u8, logEntry.EventId.Name);
+                
+                if (logEntry.Exception != null)
+                    writer.WriteString("exception"u8, logEntry.Exception.ToString());
 
                 AddScopeInformation(messageProperties, writer, scopeProvider);
                 if (logEntry.State is IReadOnlyCollection<KeyValuePair<string, object>> stateProperties)
@@ -86,17 +79,13 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
                     }
                 }
 
-
                 foreach (var prop in messageProperties)
                     WriteItem(writer, prop);
+                
                 writer.WriteEndObject();
                 writer.Flush();
             }
-#if NETCOREAPP
             textWriter.Write(Encoding.UTF8.GetString(output.WrittenMemory.Span));
-#else
-                textWriter.Write(Encoding.UTF8.GetString(output.WrittenMemory.Span.ToArray()));
-#endif
         }
 
         textWriter.Write(Environment.NewLine);

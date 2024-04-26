@@ -175,21 +175,7 @@ public abstract class FormatterTestsBase<TFormatter, TFormatterOptions>
         Assert.Contains("SimpleScope", logger.Formatted);
     }
 
-    [Fact]
-    public void Log_TimestampFormatSet_ContainsTimestamp()
-    {
-        // Arrange
-        var logger = LoggerBuilder
-            .With(o => o.TimestampFormat = "hh:mm:ss ")
-            .Build();
-
-        // Act
-        logger.LogCritical(0, null);
-
-        // Assert
-        logger.Formatted.Should().BeValidJson() //
-            .Subject.Should().HaveElement("Timestamp").Which.Should().MatchRegex(@"\d{2}:\d{2}:\d{2}");
-    }
+  
 
     #endregion
 }
