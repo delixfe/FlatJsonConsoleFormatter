@@ -1,5 +1,6 @@
 using Benchmarks.Infrastructure;
 using FlatJsonConsoleFormatter;
+using JsonConsoleFormatters;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Options;
@@ -13,7 +14,10 @@ public class FakeLoggerBuilder
     public const string DefaultLoggerName = "test";
     
     public static FakeLoggerBuilder<FlatJsonConsoleFormatterOptions> FlatJson() => new(optionsMonitor =>
-        new FlatJsonConsoleFormatter.FlatJsonConsoleFormatter(optionsMonitor), new []{Builder.DontIncludeScopes});
+        new FlatJsonConsoleFormatter.FlatJsonConsoleFormatter(optionsMonitor), [Builder.DontIncludeScopes] );
+
+    public static FakeLoggerBuilder<JeapJsonConsoleFormatterOptions> JeapJson() => new(
+        optionsMonitor => new JeapJsonConsoleFormatter(optionsMonitor), [Builder.DontIncludeScopes] );
 }
 
 public class FakeLoggerBuilder<TOptions> : FakeLoggerBuilder where TOptions : JsonConsoleFormatterOptions, new()
