@@ -24,10 +24,10 @@ public class FakeLoggerBuilder<TOptions> : FakeLoggerBuilder where TOptions : Js
 {
     private readonly List<Action<TOptions>> _configures = new();
     private readonly Func<IOptionsMonitor<TOptions>, TimeProvider, ConsoleFormatter> _factory;
-    private List<StaticScope>? _scopes;
     private readonly DateTimeOffset? _startTimestamp = null;
-    private ITestOutputHelper? _testOutputHelper;
     private readonly TimeZoneInfo? _timeZone = null;
+    private List<StaticScope>? _scopes;
+    private ITestOutputHelper? _testOutputHelper;
 
 
     public FakeLoggerBuilder(Func<IOptionsMonitor<TOptions>, TimeProvider, ConsoleFormatter> factory,

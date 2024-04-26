@@ -1,4 +1,3 @@
-using System.Collections.Frozen;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using FlatJsonConsoleFormatter;
@@ -13,7 +12,6 @@ namespace Unit;
 public class FlatJsonFormatterTests : FormatterTestsBase<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter,
     FlatJsonConsoleFormatterOptions>
 {
-
     public FlatJsonFormatterTests(ITestOutputHelper testOutputHelper) : base(FakeLoggerBuilder.FlatJson(),
         testOutputHelper)
     {
@@ -45,7 +43,7 @@ public class FlatJsonFormatterTests : FormatterTestsBase<FlatJsonConsoleFormatte
             .Subject.Should().HaveElement("Timestamp").Which. //
             Should().MatchRegex(@"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}");
     }
-    
+
     [Fact]
     public void Log_TimestampFormatSet_ContainsTimestamp()
     {

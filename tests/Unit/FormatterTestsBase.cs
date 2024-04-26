@@ -77,6 +77,37 @@ public abstract class FormatterTestsBase<TFormatter, TFormatterOptions>
         logger.Formatted.Should().BeValidJson();
     }
 
+    #region runtime/JsonConsoleFormatterTests
+
+    // TODO: remove this test
+    [Fact(Skip = "Test name is a misnomer, as there is scope")]
+    public void NoLogScope_DoesNotWriteAnyScopeContentToOutput_Json()
+    {
+        // Arrange
+        var logger = LoggerBuilder
+            .With(o =>
+            {
+                o.IncludeScopes = true;
+                o.JsonWriterOptions = new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+            })
+            .Build();
+
+        // Act
+        using (logger.BeginScope("Scope with named parameter {namedParameter}", 123))
+        using (logger.BeginScope("SimpleScope"))
+            logger.Log(LogLevel.Warning, 0, "Message with {args}", 73);
+
+        // Assert
+        Assert.Contains("Message with {args}", logger.Formatted);
+        Assert.Contains("73", logger.Formatted);
+        Assert.Contains("{OriginalFormat}", logger.Formatted);
+        Assert.Contains("namedParameter", logger.Formatted);
+        Assert.Contains("123", logger.Formatted);
+        Assert.Contains("SimpleScope", logger.Formatted);
+    }
+
+    #endregion
+
     #region ScopeTests
 
     [Fact]
@@ -143,39 +174,6 @@ public abstract class FormatterTestsBase<TFormatter, TFormatterOptions>
         // Assert
         act.Should().Throw<ArgumentOutOfRangeException>();
     }
-
-    #endregion
-
-    #region runtime/JsonConsoleFormatterTests
-
-    // TODO: remove this test
-    [Fact(Skip = "Test name is a misnomer, as there is scope")]
-    public void NoLogScope_DoesNotWriteAnyScopeContentToOutput_Json()
-    {
-        // Arrange
-        var logger = LoggerBuilder
-            .With(o =>
-            {
-                o.IncludeScopes = true;
-                o.JsonWriterOptions = new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
-            })
-            .Build();
-
-        // Act
-        using (logger.BeginScope("Scope with named parameter {namedParameter}", 123))
-        using (logger.BeginScope("SimpleScope"))
-            logger.Log(LogLevel.Warning, 0, "Message with {args}", 73);
-
-        // Assert
-        Assert.Contains("Message with {args}", logger.Formatted);
-        Assert.Contains("73", logger.Formatted);
-        Assert.Contains("{OriginalFormat}", logger.Formatted);
-        Assert.Contains("namedParameter", logger.Formatted);
-        Assert.Contains("123", logger.Formatted);
-        Assert.Contains("SimpleScope", logger.Formatted);
-    }
-
-  
 
     #endregion
 }

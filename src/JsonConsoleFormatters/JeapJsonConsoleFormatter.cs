@@ -52,20 +52,20 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
                 // we ignore the TimestampFormat option, one could check for TimestampFormat == "O"
                 writer.WriteString("@timestamp"u8,
                     FormatterOptions.UseUtcTimestamp ? TimeProvider.GetUtcNow() : TimeProvider.GetLocalNow());
-                
+
                 writer.WriteString("level"u8, GetLogLevelString(logEntry.LogLevel));
 
                 writer.WriteString("logger"u8, logEntry.Category);
-                
+
                 writer.WriteString("message"u8, message);
-                
-                
+
+
                 if (FormatterOptions.IncludeEventId)
                     writer.WriteNumber("eventId"u8, logEntry.EventId.Id);
-                
+
                 if (FormatterOptions.IncludeEventId && logEntry.EventId.Name is not null)
                     writer.WriteString("eventName"u8, logEntry.EventId.Name);
-                
+
                 if (logEntry.Exception != null)
                     writer.WriteString("exception"u8, logEntry.Exception.ToString());
 
@@ -81,10 +81,11 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
 
                 foreach (var prop in messageProperties)
                     WriteItem(writer, prop);
-                
+
                 writer.WriteEndObject();
                 writer.Flush();
             }
+
             textWriter.Write(Encoding.UTF8.GetString(output.WrittenMemory.Span));
         }
 
@@ -107,17 +108,23 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
         }
     }
 
-    private static string GetLogLevelString(LogLevel logLevel) =>
+    private static ReadOnlySpan<byte> GetLogLevelString(LogLevel logLevel) =>
         logLevel switch
         {
-            LogLevel.Trace => "Trace",
-            LogLevel.Debug => "Debug",
-            LogLevel.Information => "Information",
-            LogLevel.Warning => "Warning",
-            LogLevel.Error => "Error",
-            LogLevel.Critical => "Critical",
-            _ => throw new ArgumentOutOfRangeException(nameof(logLevel))
+            LogLevel.Trace => "TRACE"u8,
+            LogLevel.Debug => "DEBUG"u8,
+            LogLevel.Information => "INFO"u8,
+            LogLevel.Warning => "WARN"u8,
+            LogLevel.Error => "ERROR"u8,
+            LogLevel.Critical => "CRITIC"u8,
+            _ => ThrowLogLevelArgumentOutOfRangeException(nameof(logLevel), logLevel)
         };
+
+
+    [DoesNotReturn]
+    private static ReadOnlySpan<byte> ThrowLogLevelArgumentOutOfRangeException(string paraName, LogLevel logLevel) =>
+        throw new ArgumentOutOfRangeException(paraName, logLevel,
+            $"{nameof(LogLevel)} does not contain a value for {logLevel}");
 
     private void AddScopeInformation(Dictionary<string, object?> messageProperties, Utf8JsonWriter writer,
         IExternalScopeProvider? scopeProvider)
