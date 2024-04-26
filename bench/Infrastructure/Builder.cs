@@ -1,6 +1,7 @@
 using System.Text.Encodings.Web;
 using Benchmarks.Scenarios;
 using FlatJsonConsoleFormatter;
+using JsonConsoleFormatters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -62,6 +63,17 @@ public static class Builder
             });
         });
 
+    public static ILogger CreateJeapJsonLogger(params Action<JeapJsonConsoleFormatterOptions>[] configures) =>
+        CreateLogger(FlatJsonFormatterName, lb =>
+        {
+            lb.AddJeapJsonConsole(o =>
+            {
+                foreach (var configure in Defaults.Concat(configures))
+                {
+                    configure(o);
+                }
+            });
+        });
     private static ILogger CreateLogger(string formatterName, Action<ILoggingBuilder> addFormatter)
     {
         var services = new ServiceCollection();

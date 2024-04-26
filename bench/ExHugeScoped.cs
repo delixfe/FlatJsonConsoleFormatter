@@ -13,6 +13,8 @@ public class ExHugeScoped
     private ILogger? _flatJsonLogger;
     private ILogger? _flatJsonLoggerMergeDuplicateKeys;
 
+    private ILogger? _jeapLogger;
+    
     private ILogger? _jsonLogger;
 
     [GlobalSetup]
@@ -20,6 +22,7 @@ public class ExHugeScoped
     {
         Action<JsonConsoleFormatterOptions>[] defaults = { Builder.IncludeScopes, Builder.UnsafeRelaxedJsonEscaping };
         _jsonLogger = Builder.CreateJsonLogger(defaults);
+        _jeapLogger = Builder.CreateJeapJsonLogger(defaults);
         _flatJsonLogger = Builder.CreateFlatJsonLogger(defaults);
         _flatJsonLoggerMergeDuplicateKeys = Builder.CreateFlatJsonLogger(
             defaults.Append(Builder.MergeDuplKeys).ToArray());
@@ -30,6 +33,9 @@ public class ExHugeScoped
 
     [Benchmark(Baseline = true)]
     public void Json() => Run(_jsonLogger!);
+    
+    [Benchmark]
+    public void JeapJson() => Run(_jeapLogger!);
 
     [Benchmark]
     public void FlatJson() => Run(_flatJsonLogger!);

@@ -21,6 +21,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\src\FlatJsonConsoleFormatter\FlatJsonConsoleFormatter.csproj"/>
+    <ProjectReference Include="..\src\JsonConsoleFormatters\JsonConsoleFormatters.csproj" />
   </ItemGroup>
 
 </Project>

@@ -12,6 +12,8 @@ public class MaxScoped
     private ILogger? _flatJsonLogger;
     private ILogger? _flatJsonLoggerMergeDuplicateKeys;
 
+    private ILogger? _jeapJsonLogger;
+    
     private ILogger? _jsonLogger;
 
     [GlobalSetup]
@@ -21,6 +23,8 @@ public class MaxScoped
         
         _jsonLogger = Builder.CreateJsonLogger(defaults);
         _flatJsonLogger = Builder.CreateFlatJsonLogger(defaults);
+        
+        _jeapJsonLogger = Builder.CreateJeapJsonLogger(defaults);
         
         _flatJsonLogger = Builder.CreateFlatJsonLogger(Builder.IncludeScopes);
         _flatJsonLoggerMergeDuplicateKeys = Builder.CreateFlatJsonLogger(
@@ -33,6 +37,8 @@ public class MaxScoped
     [Benchmark(Baseline = true)]
     public void Json() => Run(_jsonLogger!);
 
+    [Benchmark]
+    public void JeapJson() => Run(_jeapJsonLogger!);
    
     [Benchmark]
     public void FlatJson() => Run(_flatJsonLogger!);

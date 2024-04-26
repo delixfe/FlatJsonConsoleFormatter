@@ -12,6 +12,9 @@ public class HugeLogScoped
     private ILogger? _flatJsonLogger;
     private ILogger? _flatJsonLoggerMergeDuplicateKeys;
     private ILogger? _flatJsonLoggerUnsafeRelaxedJsonEscaping;
+    
+    private ILogger? _jeapLogger;
+    private ILogger? _jeapLoggerUnsafeRelaxedJsonEscaping;
 
     private ILogger? _jsonLogger;
     private ILogger? _jsonLoggerUnsafeRelaxedJsonEscaping;
@@ -22,6 +25,11 @@ public class HugeLogScoped
         _jsonLogger = Builder.CreateJsonLogger(Builder.IncludeScopes);
         _jsonLoggerUnsafeRelaxedJsonEscaping =
             Builder.CreateJsonLogger(Builder.IncludeScopes, Builder.UnsafeRelaxedJsonEscaping);
+       
+        _jeapLogger = Builder.CreateJeapJsonLogger(Builder.IncludeScopes);
+        _jeapLoggerUnsafeRelaxedJsonEscaping =
+            Builder.CreateJeapJsonLogger(Builder.IncludeScopes, Builder.UnsafeRelaxedJsonEscaping);
+       
         _flatJsonLogger = Builder.CreateFlatJsonLogger(Builder.IncludeScopes);
         _flatJsonLoggerMergeDuplicateKeys =
             Builder.CreateFlatJsonLogger(Builder.IncludeScopes, Builder.MergeDuplKeys);
@@ -37,6 +45,12 @@ public class HugeLogScoped
 
     [Benchmark]
     public void Json_UnsafeJson() => Run(_jsonLoggerUnsafeRelaxedJsonEscaping!);
+    
+    [Benchmark]
+    public void JeapJson() => Run(_jeapLogger!);
+    
+    [Benchmark]
+    public void JeapJson_UnsafeJson() => Run(_jeapLoggerUnsafeRelaxedJsonEscaping!);
 
     [Benchmark]
     public void FlatJson() => Run(_flatJsonLogger!);

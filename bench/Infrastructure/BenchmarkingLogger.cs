@@ -38,8 +38,11 @@ public class BenchmarkingLogger : ILogger
 #if DEBUG
         Console.Error.WriteLine(sb);
         Console.Error.Flush();
+#else
+        // ensure that the string is created
+        ArgumentException.ThrowIfNullOrEmpty(sb.ToString());
 #endif
-
+        
         // reset string builder
         sb.Clear();
         if (sb.Capacity > Capacity) sb.Capacity = Capacity;
