@@ -19,13 +19,13 @@ public class FluentAssertionsExtensionsTests
                         }
                    }
                    """;
-        
+
         json
             .Should().BeValidJson().Which //
             .Should().HaveElementSomewhere("key").Which //
             .Should().HaveValue("value");
     }
-    
+
     [Fact]
     public void HaveElementSomewhere_ElementDoesNotExist_Throws()
     {
@@ -38,7 +38,7 @@ public class FluentAssertionsExtensionsTests
                         }
                    }
                    """;
-        
+
         Action act = () => json
             .Should().BeValidJson().Which //
             .Should().HaveElementSomewhere("key").Which //
@@ -46,7 +46,7 @@ public class FluentAssertionsExtensionsTests
 
         act.Should().Throw<XunitException>();
     }
-    
+
     [Fact]
     public void NotHaveElementSomewhere_ElementDoesNotExist_ReturnsAnd()
     {
@@ -65,7 +65,7 @@ public class FluentAssertionsExtensionsTests
             .Should().NotHaveElementSomewhere("key") //
             .Should().NotBeNull();
     }
-    
+
     [Fact]
     public void NotHaveElementSomewhere_ElementExists_Throws()
     {

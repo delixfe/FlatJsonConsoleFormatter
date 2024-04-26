@@ -13,19 +13,39 @@ public abstract class FormatterTestsBase<TFormatter, TFormatterOptions>
     where TFormatter : ConsoleFormatter
     where TFormatterOptions : JsonConsoleFormatterOptions, new()
 {
-    public ITestOutputHelper TestOutputHelper { get; }
-    public FakeLoggerBuilder<TFormatterOptions> LoggerBuilder { get; }
-
-
-    protected const string _loggerName = FakeLoggerBuilder.DefaultLoggerName;
+    protected const string _loggerName = C.DefaultLoggerName;
     protected const string _state = "This is a test, and {curly braces} are just fine!";
-    protected readonly Func<object, Exception, string> _defaultFormatter = (state, exception) => state.ToString();
+#pragma warning disable CS8603 // Possible null reference return
+    protected readonly Func<object, Exception?, string> _defaultFormatter = (state, _) => state?.ToString();
+#pragma warning restore CS8603 // Possible null reference return.
 
     public FormatterTestsBase(FakeLoggerBuilder<TFormatterOptions> fakeLoggerBuilder,
         ITestOutputHelper testOutputHelper)
     {
         TestOutputHelper = testOutputHelper;
         LoggerBuilder = fakeLoggerBuilder.WithTestOutputHelper(testOutputHelper);
+    }
+
+    public ITestOutputHelper TestOutputHelper { get; }
+    public FakeLoggerBuilder<TFormatterOptions> LoggerBuilder { get; }
+
+    public static TheoryData<LogLevel> LogLevels
+    {
+        get
+        {
+            var data = new TheoryData<LogLevel>();
+            foreach (LogLevel level in Enum.GetValues(typeof(LogLevel)))
+            {
+                if (level == LogLevel.None)
+                {
+                    continue;
+                }
+
+                data.Add(level);
+            }
+
+            return data;
+        }
     }
 
     [Fact]
@@ -93,7 +113,7 @@ public abstract class FormatterTestsBase<TFormatter, TFormatterOptions>
     }
 
     #endregion
-    
+
     #region runtime/ConsoleFormatterTests
 
     [Theory]
@@ -104,7 +124,7 @@ public abstract class FormatterTestsBase<TFormatter, TFormatterOptions>
         var logger = LoggerBuilder.Build();
 
         // Act
-        Func<object, Exception, string> formatter = (state, exception) => null;
+        Func<object, Exception?, string> formatter = (state, exception) => null!;
         logger.Log(level, 0, _state, null, formatter);
 
         // Assert
@@ -118,7 +138,7 @@ public abstract class FormatterTestsBase<TFormatter, TFormatterOptions>
         var logger = LoggerBuilder.Build();
 
         // Act
-        Action act = () => logger.Log((LogLevel)8, 0, _state, null, _defaultFormatter);
+        var act = () => logger.Log((LogLevel)8, 0, _state, null, _defaultFormatter);
 
         // Assert
         act.Should().Throw<ArgumentOutOfRangeException>();
@@ -133,11 +153,11 @@ public abstract class FormatterTestsBase<TFormatter, TFormatterOptions>
     public void NoLogScope_DoesNotWriteAnyScopeContentToOutput_Json()
     {
         // Arrange
-        var logger = LoggerBuilder 
+        var logger = LoggerBuilder
             .With(o =>
             {
                 o.IncludeScopes = true;
-                o.JsonWriterOptions = new JsonWriterOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+                o.JsonWriterOptions = new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
             })
             .Build();
 
@@ -162,34 +182,14 @@ public abstract class FormatterTestsBase<TFormatter, TFormatterOptions>
         var logger = LoggerBuilder
             .With(o => o.TimestampFormat = "hh:mm:ss ")
             .Build();
-        
+
         // Act
-        logger.LogCritical(eventId: 0, message: null);
-        
+        logger.LogCritical(0, null);
+
         // Assert
         logger.Formatted.Should().BeValidJson() //
             .Subject.Should().HaveElement("Timestamp").Which.Should().MatchRegex(@"\d{2}:\d{2}:\d{2}");
-
     }
 
     #endregion
-    
-    public static TheoryData<LogLevel> LogLevels
-    {
-        get
-        {
-            var data = new TheoryData<LogLevel>();
-            foreach (LogLevel level in Enum.GetValues(typeof(LogLevel)))
-            {
-                if (level == LogLevel.None)
-                {
-                    continue;
-                }
-
-                data.Add(level);
-            }
-
-            return data;
-        }
-    }
 }

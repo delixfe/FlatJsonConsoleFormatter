@@ -10,20 +10,24 @@ using Microsoft.Extensions.Options;
 
 namespace JsonConsoleFormatters;
 
-public class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
+public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
 {
     public const string FormatterName = "jeap-json";
-    
+
+    private static readonly JsonNamingPolicy JsonCamelCaseNamingPolicy = JsonNamingPolicy.CamelCase;
+
     private readonly IDisposable? _optionsReloadToken;
 
-    public JeapJsonConsoleFormatter(IOptionsMonitor<JeapJsonConsoleFormatterOptions> options)
+    public JeapJsonConsoleFormatter(IOptionsMonitor<JeapJsonConsoleFormatterOptions> options, TimeProvider timeProvider)
         : base(FormatterName)
     {
         ReloadLoggerOptions(options.CurrentValue);
         _optionsReloadToken = options.OnChange(ReloadLoggerOptions);
+        TimeProvider = timeProvider;
     }
 
     internal JeapJsonConsoleFormatterOptions FormatterOptions { get; set; }
+    public TimeProvider TimeProvider { get; }
 
     public void Dispose() => _optionsReloadToken?.Dispose();
 
@@ -46,12 +50,12 @@ public class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
             using (var writer = new Utf8JsonWriter(output, FormatterOptions.JsonWriterOptions))
             {
                 var messageProperties = new Dictionary<string, object?>();
-                var timestampFormat = FormatterOptions.TimestampFormat;
-                if (timestampFormat != null)
-                {
-                    var dateTimeOffset = FormatterOptions.UseUtcTimestamp ? DateTimeOffset.UtcNow : DateTimeOffset.Now;
-                    AddMessageProperty(messageProperties, "Timestamp", dateTimeOffset.ToString(timestampFormat));
-                }
+
+                writer.WriteStartObject();
+
+                // we ignore the TimestampFormat option, one could check for TimestampFormat == "O"
+                writer.WriteString("Timestamp",
+                    FormatterOptions.UseUtcTimestamp ? TimeProvider.GetUtcNow() : TimeProvider.GetLocalNow());
 
                 if (FormatterOptions.IncludeEventId)
                     AddMessageProperty(messageProperties, nameof(logEntry.EventId), eventId);
@@ -82,7 +86,7 @@ public class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
                     }
                 }
 
-                writer.WriteStartObject();
+
                 foreach (var prop in messageProperties)
                     WriteItem(writer, prop);
                 writer.WriteEndObject();
@@ -211,5 +215,3 @@ public class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
     [MemberNotNull(nameof(FormatterOptions))]
     private void ReloadLoggerOptions(JeapJsonConsoleFormatterOptions options) => FormatterOptions = options;
 }
-
-

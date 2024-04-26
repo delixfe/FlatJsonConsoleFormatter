@@ -21,7 +21,7 @@ public static class FluentAssertionsExtensions
     ///     Zero or more objects to format using the placeholders in <see paramref="because" />.
     /// </param>
     [CustomAssertion]
-    public static AndWhichConstraint<JTokenAssertions,JToken> HaveElementSomewhere(this JTokenAssertions assertion,
+    public static AndWhichConstraint<JTokenAssertions, JToken> HaveElementSomewhere(this JTokenAssertions assertion,
         string expected, string because = "",
         params object[] becauseArgs)
     {
@@ -30,7 +30,7 @@ public static class FluentAssertionsExtensions
             .ForCondition(jsonPathResult != null)
             .FailWith("Expected JSON document {0} to have element \"" + expected.EscapePlaceholders() + "\"{reason}" +
                       ", but no such element was found.", assertion.Subject);
-        return new AndWhichConstraint<JTokenAssertions,JToken>(assertion, jsonPathResult!);
+        return new AndWhichConstraint<JTokenAssertions, JToken>(assertion, jsonPathResult!);
     }
 
     private static JToken? SearchWithJsonPath(JTokenAssertions assertion, string expected)
@@ -52,24 +52,26 @@ public static class FluentAssertionsExtensions
     /// <param name="becauseArgs">
     ///     Zero or more objects to format using the placeholders in <see paramref="because" />.
     /// </param>
-    public static AndConstraint<JTokenAssertions> NotHaveElementSomewhere(this JTokenAssertions assertion, string unexpected, string because = "",
+    public static AndConstraint<JTokenAssertions> NotHaveElementSomewhere(this JTokenAssertions assertion,
+        string unexpected, string because = "",
         params object[] becauseArgs)
     {
-       
         var jsonPathResult = SearchWithJsonPath(assertion, unexpected);
         Execute.Assertion
             .ForCondition(jsonPathResult == null)
             .BecauseOf(because, becauseArgs)
-            .FailWith("Did not expect JSON document {0} to have element \"" + unexpected.EscapePlaceholders() + "\"{reason}.", assertion.Subject);
+            .FailWith(
+                "Did not expect JSON document {0} to have element \"" + unexpected.EscapePlaceholders() + "\"{reason}.",
+                assertion.Subject);
 
         return new AndConstraint<JTokenAssertions>(assertion);
     }
-    
+
     /// <summary>
-    /// Replaces all characters that might conflict with formatting placeholders with their escaped counterparts.
+    ///     Replaces all characters that might conflict with formatting placeholders with their escaped counterparts.
     /// </summary>
     //
     // from https://github.com/fluentassertions/fluentassertions.json/blob/5c95025ba1459fbdfb30e7e62aa652003eeb21cc/Src/FluentAssertions.Json/Common/StringExtensions.cs
-    static string EscapePlaceholders(this string value) =>
+    private static string EscapePlaceholders(this string value) =>
         value.Replace("{", "{{").Replace("}", "}}");
 }

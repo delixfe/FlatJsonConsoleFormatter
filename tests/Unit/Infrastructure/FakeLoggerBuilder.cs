@@ -4,6 +4,7 @@ using JsonConsoleFormatters;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
 using Xunit.Abstractions;
 
@@ -11,23 +12,26 @@ namespace Unit.Infrastructure;
 
 public class FakeLoggerBuilder
 {
-    public const string DefaultLoggerName = "test";
-    
-    public static FakeLoggerBuilder<FlatJsonConsoleFormatterOptions> FlatJson() => new(optionsMonitor =>
-        new FlatJsonConsoleFormatter.FlatJsonConsoleFormatter(optionsMonitor), [Builder.DontIncludeScopes] );
+    public static FakeLoggerBuilder<FlatJsonConsoleFormatterOptions> FlatJson() => new((optionsMonitor, _) =>
+        new FlatJsonConsoleFormatter.FlatJsonConsoleFormatter(optionsMonitor), [Builder.DontIncludeScopes]);
 
     public static FakeLoggerBuilder<JeapJsonConsoleFormatterOptions> JeapJson() => new(
-        optionsMonitor => new JeapJsonConsoleFormatter(optionsMonitor), [Builder.DontIncludeScopes] );
+        (optionsMonitor, timeProvider) => new JeapJsonConsoleFormatter(optionsMonitor, timeProvider),
+        [Builder.DontIncludeScopes]);
 }
 
 public class FakeLoggerBuilder<TOptions> : FakeLoggerBuilder where TOptions : JsonConsoleFormatterOptions, new()
 {
     private readonly List<Action<TOptions>> _configures = new();
-    private readonly Func<IOptionsMonitor<TOptions>, ConsoleFormatter> _factory;
+    private readonly Func<IOptionsMonitor<TOptions>, TimeProvider, ConsoleFormatter> _factory;
     private List<StaticScope>? _scopes;
+    private readonly DateTimeOffset? _startTimestamp = null;
     private ITestOutputHelper? _testOutputHelper;
-    
-    public FakeLoggerBuilder(Func<IOptionsMonitor<TOptions>, ConsoleFormatter> factory, IEnumerable<Action<TOptions>> preConfigures)
+    private readonly TimeZoneInfo? _timeZone = null;
+
+
+    public FakeLoggerBuilder(Func<IOptionsMonitor<TOptions>, TimeProvider, ConsoleFormatter> factory,
+        IEnumerable<Action<TOptions>> preConfigures)
     {
         _factory = factory;
         _configures.AddRange(preConfigures);
@@ -38,7 +42,7 @@ public class FakeLoggerBuilder<TOptions> : FakeLoggerBuilder where TOptions : Js
         _configures.Add(configure);
         return this;
     }
-    
+
     public FakeLoggerBuilder<TOptions> WithTestOutputHelper(ITestOutputHelper? testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
@@ -53,7 +57,7 @@ public class FakeLoggerBuilder<TOptions> : FakeLoggerBuilder where TOptions : Js
 
     public FakeLoggerBuilder<TOptions> AddStaticScope(string? message, string key, object value)
     {
-        _scopes ??= new();
+        _scopes ??= new List<StaticScope>();
         _scopes.Add(new StaticScope(message, new Dictionary<string, object> { [key] = value }));
         return this;
     }
@@ -69,11 +73,15 @@ public class FakeLoggerBuilder<TOptions> : FakeLoggerBuilder where TOptions : Js
         optionsMonitor = Substitute.For<IOptionsMonitor<TOptions>>();
         optionsMonitor.CurrentValue.Returns(options);
 
-        var logger = new FakeLogger(_factory(optionsMonitor));
-       
+        var timeProvider = new FakeTimeProvider(_startTimestamp ?? C.DefaultStartTimestamp);
+        timeProvider.SetLocalTimeZone(_timeZone ?? C.DefaultTimeZone);
+
+        var logger = new FakeLogger(_factory(optionsMonitor, timeProvider));
+
         logger.TestOutputHelper = _testOutputHelper;
 
-        logger.ScopeProvider = _scopes != null ? new StaticExternalScopeProvider(_scopes) : new LoggerExternalScopeProvider();
+        logger.ScopeProvider =
+            _scopes != null ? new StaticExternalScopeProvider(_scopes) : new LoggerExternalScopeProvider();
         if (_scopes != null)
         {
             logger.ScopeProvider = new StaticExternalScopeProvider(_scopes);

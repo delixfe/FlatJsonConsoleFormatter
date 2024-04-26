@@ -9,16 +9,17 @@ namespace Unit.Infrastructure;
 public class FakeLogger : ILogger
 {
     private readonly StringWriter _stringWriter = new(new StringBuilder(1024));
-    
+
     public Action<string>? OnLogFormatted;
-    public ITestOutputHelper? TestOutputHelper { get; set; }
-    
+
     public FakeLogger(ConsoleFormatter formatter)
     {
         Formatter = formatter;
     }
 
-    public string Name { get; set; } = FakeLoggerBuilder.DefaultLoggerName;
+    public ITestOutputHelper? TestOutputHelper { get; set; }
+
+    public string Name { get; set; } = C.DefaultLoggerName;
     public ConsoleFormatter Formatter { get; }
 
     public IExternalScopeProvider? ScopeProvider { get; set; }

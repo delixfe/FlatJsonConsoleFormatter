@@ -9,7 +9,8 @@ using Xunit.Abstractions;
 
 namespace Unit;
 
-public class FlatJsonFormatterTests : FormatterTestsBase<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter, FlatJsonConsoleFormatterOptions>
+public class FlatJsonFormatterTests : FormatterTestsBase<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter,
+    FlatJsonConsoleFormatterOptions>
 {
     public FlatJsonFormatterTests(ITestOutputHelper testOutputHelper) : base(FakeLoggerBuilder.FlatJson(),
         testOutputHelper)
@@ -26,7 +27,7 @@ public class FlatJsonFormatterTests : FormatterTestsBase<FlatJsonConsoleFormatte
             {
                 o.TimestampFormat = "yyyy-MM-ddTHH:mm:sszz ";
                 o.UseUtcTimestamp = false;
-                o.JsonWriterOptions = new JsonWriterOptions()
+                o.JsonWriterOptions = new JsonWriterOptions
                 {
                     // otherwise escapes for timezone formatting from + to \u002b
                     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping, Indented = true
