@@ -82,6 +82,9 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
                 foreach (var prop in messageProperties)
                     WriteItem(writer, prop);
 
+                if (FormatterOptions.IncludeThreadName)
+                    writer.WriteString("thread_name"u8, Thread.CurrentThread.Name);
+
                 writer.WriteEndObject();
                 writer.Flush();
             }

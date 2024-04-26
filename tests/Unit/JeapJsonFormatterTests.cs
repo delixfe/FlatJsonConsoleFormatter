@@ -113,6 +113,23 @@ public class JeapJsonFormatterTests : FormatterTestsBase<JeapJsonConsoleFormatte
             .Should().BeOfType<JValue>().Which.Value.Should().Be(expected);
     }
 
+    [Fact]
+    public void Log_IncludeThreadName_OutputsThreadName()
+    {
+        // Arrange
+        var logger = LoggerBuilder.With(o => o.IncludeThreadName = true).Build();
+        var expectedName = Thread.CurrentThread.Name;
+
+        // Act
+        logger.LogInformation("Hi!");
+
+        // Assert
+        logger.Formatted.Should().BeValidJson();
+        JToken.Parse(logger.Formatted!) //
+            .Should().HaveElement(_spec.ElementNameThreadName).Which //
+            .Should().BeOfType<JValue>().Which.Value.Should().Be(expectedName);
+    }
+
     public class Spec
     {
         public string ElementNameTimestamp { get; } = "@timestamp";

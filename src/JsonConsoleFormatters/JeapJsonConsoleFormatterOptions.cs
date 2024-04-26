@@ -20,6 +20,7 @@ public class JeapJsonConsoleFormatterOptions : JsonConsoleFormatterOptions
         IncludeScopes = true;
     }
 
+    public bool IncludeThreadName { get; set; }
 
     /// <summary>
     ///     Whether to include the seldom used EventId field. Defaults to false
