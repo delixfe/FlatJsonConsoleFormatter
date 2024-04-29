@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Unit;
 
-public class Data
+public static class Data
 {
     public static TheoryData<LogLevel> LogLevels
     {

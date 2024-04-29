@@ -16,7 +16,7 @@ public abstract class FormatterTestsBase<TFormatter, TFormatterOptions>
     {
         TestOutputHelper = testOutputHelper;
         Spec = spec;
-        LoggerBuilder = spec.CreateLoggerBuilder();
+        LoggerBuilder = spec.CreateLoggerBuilder().WithTestOutputHelper(TestOutputHelper);
     }
 
     public SpecBase<TFormatterOptions> Spec { get; }

@@ -6,6 +6,7 @@ namespace Unit.Infrastructure;
 
 public static class ConfigActions
 {
+    public static readonly Action<ConsoleFormatterOptions> NoOp = o => { };
     public static readonly Action<ConsoleFormatterOptions> TimestampFormatO = o => o.TimestampFormat = "O";
     public static readonly Action<ConsoleFormatterOptions> UseUtcTimestamp = o => o.UseUtcTimestamp = false;
     public static readonly Action<ConsoleFormatterOptions> IncludeScopes = o => o.IncludeScopes = true;

@@ -21,6 +21,17 @@ public abstract class SpecBase<TOptions> where TOptions : JsonConsoleFormatterOp
     public virtual string ElementNameEventName { get; } = string.Empty;
     public virtual string ElementNameThreadName { get; } = string.Empty;
 
+    // additional functionality - template and message
+    public virtual bool OutputsOriginalFormat { get; } = true;
+    public virtual string ElementNameOriginalFormat { get; } = "{OriginalFormat}";
+
+    // additional functionality - scope
+    public virtual bool ScopeOutputsMessage { get; } = true;
+    public virtual string ScopeElementNameMessage { get; } = "Message";
+
+    public virtual bool ScopeOutputsOriginalFormat { get; } = true;
+    public virtual string ScopeElementOriginalFormat { get; } = "{OriginalFormat}";
+
     // log levels
     public virtual IReadOnlyDictionary<LogLevel, string> LogLevelStrings { get; } = new Dictionary<LogLevel, string>
     {
