@@ -8,7 +8,7 @@ namespace Unit.Infrastructure;
 
 public class FakeLoggerBuilder<TOptions> where TOptions : JsonConsoleFormatterOptions, new()
 {
-    private readonly List<Action<TOptions>> _configures = new();
+    private readonly List<Action<TOptions>> _configures = new(ConfigActions.Defaults);
     private readonly Func<IOptionsMonitor<TOptions>, TimeProvider, ConsoleFormatter> _factory;
     private readonly DateTimeOffset? _startTimestamp = null;
     private readonly TimeZoneInfo? _timeZone = null;

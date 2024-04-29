@@ -3,6 +3,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.ComponentModel;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using Microsoft.Extensions.Logging.Console;
@@ -10,11 +11,11 @@ using Microsoft.Extensions.Logging.Console;
 namespace JsonConsoleFormatters;
 
 /// <summary>
-///     Options for <see cref="JeapJsonConsoleFormatter"/>.
+///     Options for <see cref="JeapJsonConsoleFormatter" />.
 /// </summary>
 /// <remarks>
-/// By default, the formatter sets the Encoder to <see cref="JavaScriptEncoder.UnsafeRelaxedJsonEscaping"/>
-/// and includes scopes.
+///     By default, the formatter sets the Encoder to <see cref="JavaScriptEncoder.UnsafeRelaxedJsonEscaping" />
+///     and includes scopes.
 /// </remarks>
 public class JeapJsonConsoleFormatterOptions : JsonConsoleFormatterOptions
 {
@@ -39,24 +40,37 @@ public class JeapJsonConsoleFormatterOptions : JsonConsoleFormatterOptions
     /// </remarks>
     public bool IncludeThreadName { get; set; }
 
-    /// <summary>
-    ///     Whether to include the seldom used EventId field. Defaults to false
-    /// </summary>
-    public bool IncludeEventId { get; set; }
+    // /// <summary>
+    // ///     Whether to include the seldom used EventId field. Defaults to false
+    // /// </summary>
+    // public bool IncludeEventId { get; set; }
 
     /// <summary>
-    ///     If a log property is repeated from multiple sources, this controls whether the emitted log message has a single
-    ///     property with the last logged value of the state key or whether a number is appended to deduplicate them.
+    ///     Determines whether to silently drop properties with duplicate keys. Defaults to false.
+    ///     If a log property is repeated from multiple sources, this controls whether the formatter silently drops
+    ///     the duplicated property, or if set to false will append a number to the key to deduplicate them.
     /// </summary>
     /// <remarks>
+    ///     <para>
+    ///         Log properties can be added from a scope or from the log message itself.
+    ///         This can lead to duplicated property keys.
+    ///         If this is set to true, the formatter will silently drop the duplicated property.
+    ///         Otherwise, the formatter will append a number to the key to deduplicate them.
+    ///     </para>
+    ///     <para>
+    ///         The formatter uses the following evaluation order:
+    ///         Standard log properties, scope properties, log message properties.
+    ///     </para>
     ///     Given the following code:
     ///     <code>
     ///     using (_logger.BeginScope(new Dictionary&lt;string, object&gt; { { "x", 1 } }))
     ///     using (_logger.BeginScope(new Dictionary&lt;string, object&gt; { { "x", 2 } }))
     ///         _logger.LogDebug("x is {x}", 3);
     ///     </code>
-    ///     Set this to true in order to log {x: 3}
-    ///     Set this to false in order to log {x: 1, x_1: 2, x_2: 3}
+    ///     DropDuplicatePropertyKey = true: {x: 3}
+    ///     DropDuplicatePropertyKey = false:  {x: 3, x_1: 2, x_2: 3}
     /// </remarks>
-    public bool MergeDuplicateKeys { get; set; }
+    // TODO: Implement DropDuplicatePropertyKeys or remove it
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool DropDuplicatePropertyKeys { get; set; }
 }

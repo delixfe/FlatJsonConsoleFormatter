@@ -1,6 +1,5 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using FluentAssertions.Execution;
 using JsonConsoleFormatters;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -55,7 +54,7 @@ public class
     public void Log_UsesCorrectStandardElementNames()
     {
         // Arrange
-        var logger = LoggerBuilder.With(o => o.IncludeEventId = true).Build();
+        var logger = LoggerBuilder.With(Spec.ConfigureIncludeEventHandling(true)).Build();
         var ex = new Exception("Test exception");
 
         // Act

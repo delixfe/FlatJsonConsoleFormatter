@@ -44,6 +44,8 @@ public abstract class SpecBase<TOptions> where TOptions : JsonConsoleFormatterOp
         [LogLevel.Critical] = "Critical"
     }.ToFrozenDictionary();
 
+    public virtual bool SupportsTimeProvider { get; } = false;
+
     // additional functionality - state and scope element names
     public virtual string MapStateOrScopeElementNames(string name) => name;
 
@@ -65,4 +67,9 @@ public abstract class SpecBase<TOptions> where TOptions : JsonConsoleFormatterOp
     // builder
 
     public abstract FakeLoggerBuilder<TOptions> CreateLoggerBuilder();
+
+    public abstract Action<TOptions> ConfigurePropertyNameDuplicateHandling(
+        PropertyNameDuplicateHandling duplicateHandling);
+
+    public abstract Action<TOptions> ConfigureIncludeEventHandling(bool includeEventHandling);
 }

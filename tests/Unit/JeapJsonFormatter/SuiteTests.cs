@@ -31,10 +31,10 @@ public class JeapJsonExtensionsLoggingConsoleFormatterTest :
     }
 }
 
-public class JeapJsonScopeFormatterTests :
-    ScopeFormatterTestsBase<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions>
+public class JeapJsonStateOrScopePropertyTests :
+    StateOrScopePropertyTestsBase<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions>
 {
-    public JeapJsonScopeFormatterTests(ITestOutputHelper testOutputHelper) : base(new JeapJsonFormatterSpec(),
+    public JeapJsonStateOrScopePropertyTests(ITestOutputHelper testOutputHelper) : base(new JeapJsonFormatterSpec(),
         testOutputHelper)
     {
     }

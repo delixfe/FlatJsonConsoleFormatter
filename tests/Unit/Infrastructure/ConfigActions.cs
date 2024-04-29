@@ -23,4 +23,11 @@ public static class ConfigActions
 
     public static readonly Action<FlatJsonConsoleFormatterOptions>
         MergeDuplKeys = o => o.MergeDuplicateKeys = true;
+
+    public static readonly Action<JsonConsoleFormatterOptions>[] Defaults =
+    {
+        DontIncludeScopes, // FlatJson defaults to true
+        UnsafeRelaxedJsonEscaping, // we will always want to use this
+        TimestampFormatO
+    };
 }

@@ -33,9 +33,26 @@ public class JeapJsonFormatterSpec : SpecBase<JeapJsonConsoleFormatterOptions>
         [LogLevel.Critical] = "CRITIC"
     }.ToFrozenDictionary();
 
+    public override bool SupportsTimeProvider { get; } = true;
+
     public override string MapStateOrScopeElementNames(string name) => JsonNamingPolicy.CamelCase.ConvertName(name);
 
     public override FakeLoggerBuilder<JeapJsonConsoleFormatterOptions> CreateLoggerBuilder() => new(
         (optionsMonitor, timeProvider) => new JeapJsonConsoleFormatter(optionsMonitor, timeProvider),
-        [ConfigActions.DontIncludeScopes]);
+        Array.Empty<Action<JeapJsonConsoleFormatterOptions>>());
+
+    public override Action<JeapJsonConsoleFormatterOptions> ConfigurePropertyNameDuplicateHandling(
+        PropertyNameDuplicateHandling duplicateHandling) => duplicateHandling switch
+    {
+        PropertyNameDuplicateHandling.Overwrite => o => o.DropDuplicatePropertyKeys = true,
+        PropertyNameDuplicateHandling.UnderscoreIntSuffix => o => o.DropDuplicatePropertyKeys = false,
+        _ => throw new ArgumentOutOfRangeException(nameof(duplicateHandling), duplicateHandling, null)
+    };
+
+    public override Action<JeapJsonConsoleFormatterOptions> ConfigureIncludeEventHandling(bool includeEventHandling) =>
+        o =>
+        {
+            if (!includeEventHandling)
+                throw new NotSupportedException("JeapJsonConsoleFormatter does not support disabling IncludeEventId");
+        };
 }
