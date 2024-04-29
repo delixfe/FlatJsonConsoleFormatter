@@ -1,22 +1,16 @@
-using System.Collections.Frozen;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using FluentAssertions;
 using FluentAssertions.Execution;
-using FluentAssertions.Json;
 using JsonConsoleFormatters;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using Unit.Infrastructure;
-using Xunit.Abstractions;
 
-namespace Unit;
+namespace Unit.JeapJsonFormatter;
 
-public class JeapJsonFormatterTests : FormatterTestsBase<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions>
+public class
+    JeapJsonCustomFormatterTests : FormatterTestsBase<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions>
 {
-    protected readonly Spec _spec = new();
-
-    public JeapJsonFormatterTests(ITestOutputHelper testOutputHelper) : base(FakeLoggerBuilder.JeapJson(),
+    public JeapJsonCustomFormatterTests(ITestOutputHelper testOutputHelper) : base(new JeapJsonFormatterSpec(),
         testOutputHelper)
     {
     }
@@ -46,7 +40,7 @@ public class JeapJsonFormatterTests : FormatterTestsBase<JeapJsonConsoleFormatte
             .Build();
 
         var expected = $"""
-                        "{_spec.ElementNameTimestamp}":"{(useUtcTimeStamp ? C.ExpectedDefaultTimestampStringUtc : C.ExpectedDefaultTimestampStringLocal)}"
+                        "{Spec.ElementNameTimestamp}":"{(useUtcTimeStamp ? C.ExpectedDefaultTimestampStringUtc : C.ExpectedDefaultTimestampStringLocal)}"
                         """;
 
         // Act
@@ -74,18 +68,18 @@ public class JeapJsonFormatterTests : FormatterTestsBase<JeapJsonConsoleFormatte
 
         var log = JToken.Parse(logger.Formatted!);
 
-        log.Should().HaveElement(_spec.ElementNameLogLevel);
-        log.Should().HaveElement(_spec.ElementNameMessage);
-        log.Should().HaveElement(_spec.ElementNameException);
-        log.Should().HaveElement(_spec.ElementNameCategory);
-        log.Should().HaveElement(_spec.ElementNameEventId);
-        log.Should().HaveElement(_spec.ElementNameEventName);
+        log.Should().HaveElement(Spec.ElementNameLogLevel);
+        log.Should().HaveElement(Spec.ElementNameMessage);
+        log.Should().HaveElement(Spec.ElementNameException);
+        log.Should().HaveElement(Spec.ElementNameCategory);
+        log.Should().HaveElement(Spec.ElementNameEventId);
+        log.Should().HaveElement(Spec.ElementNameEventName);
     }
 
     public TheoryData<LogLevel, string> LogLevelWithExpectations()
     {
         var data = new TheoryData<LogLevel, string>();
-        foreach (var (level, expected) in _spec.LogLevelStrings)
+        foreach (var (level, expected) in Spec.LogLevelStrings)
         {
             data.Add(level, expected);
         }
@@ -101,7 +95,7 @@ public class JeapJsonFormatterTests : FormatterTestsBase<JeapJsonConsoleFormatte
 
         // Arrange
         var logger = LoggerBuilder.Build();
-        var expected = _spec.LogLevelStrings[level];
+        var expected = Spec.LogLevelStrings[level];
 
         // Act
         logger.Log(level, "Hi!");
@@ -109,7 +103,7 @@ public class JeapJsonFormatterTests : FormatterTestsBase<JeapJsonConsoleFormatte
         // Assert
         logger.Formatted.Should().BeValidJson();
         JToken.Parse(logger.Formatted!) //
-            .Should().HaveElement(_spec.ElementNameLogLevel).Which //
+            .Should().HaveElement(Spec.ElementNameLogLevel).Which //
             .Should().BeOfType<JValue>().Which.Value.Should().Be(expected);
     }
 
@@ -126,32 +120,7 @@ public class JeapJsonFormatterTests : FormatterTestsBase<JeapJsonConsoleFormatte
         // Assert
         logger.Formatted.Should().BeValidJson();
         JToken.Parse(logger.Formatted!) //
-            .Should().HaveElement(_spec.ElementNameThreadName).Which //
+            .Should().HaveElement(Spec.ElementNameThreadName).Which //
             .Should().BeOfType<JValue>().Which.Value.Should().Be(expectedName);
-    }
-
-    public class Spec
-    {
-        public string ElementNameTimestamp { get; } = "@timestamp";
-        public string ElementNameLogLevel { get; } = "level";
-        public string ElementNameMessage { get; } = "message";
-        public string ElementNameException { get; } = "exception";
-        public string ElementNameCategory { get; } = "logger";
-        public string ElementNameEventId { get; } = "eventId";
-
-        public string ElementNameEventName { get; } = "eventName";
-
-        public string ElementNameThreadName { get; } = "thread_name";
-
-        public IReadOnlyDictionary<LogLevel, string> LogLevelStrings { get; } = new Dictionary<LogLevel, string>
-        {
-            // TODO: check against otel
-            [LogLevel.Trace] = "TRACE",
-            [LogLevel.Debug] = "DEBUG",
-            [LogLevel.Information] = "INFO",
-            [LogLevel.Warning] = "WARN",
-            [LogLevel.Error] = "ERROR",
-            [LogLevel.Critical] = "CRITIC"
-        }.ToFrozenDictionary();
     }
 }

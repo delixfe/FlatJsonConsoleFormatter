@@ -1,26 +1,12 @@
-using Benchmarks.Infrastructure;
-using FlatJsonConsoleFormatter;
-using JsonConsoleFormatters;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
-using Xunit.Abstractions;
 
 namespace Unit.Infrastructure;
 
-public class FakeLoggerBuilder
-{
-    public static FakeLoggerBuilder<FlatJsonConsoleFormatterOptions> FlatJson() => new((optionsMonitor, _) =>
-        new FlatJsonConsoleFormatter.FlatJsonConsoleFormatter(optionsMonitor), [Builder.DontIncludeScopes]);
-
-    public static FakeLoggerBuilder<JeapJsonConsoleFormatterOptions> JeapJson() => new(
-        (optionsMonitor, timeProvider) => new JeapJsonConsoleFormatter(optionsMonitor, timeProvider),
-        [Builder.DontIncludeScopes]);
-}
-
-public class FakeLoggerBuilder<TOptions> : FakeLoggerBuilder where TOptions : JsonConsoleFormatterOptions, new()
+public class FakeLoggerBuilder<TOptions> where TOptions : JsonConsoleFormatterOptions, new()
 {
     private readonly List<Action<TOptions>> _configures = new();
     private readonly Func<IOptionsMonitor<TOptions>, TimeProvider, ConsoleFormatter> _factory;
