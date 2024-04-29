@@ -1,13 +1,48 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <PackageId>JsonConsoleFormatters</PackageId>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Version>0.1.0</Version>
+    <Description>Provides JSON formatters consumable by `Microsoft.Extensions.Logging.Console`.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/delixfe/FlatJsonConsoleFormatter</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/delixfe/FlatJsonConsoleFormatter</PackageProjectUrl>
+    <PackageTags>logging, json, console, formatter</PackageTags>
+    <PackageReleaseNotes>Work in progress.</PackageReleaseNotes>
+    <Copyright>Copyright (c) delixfe 2024.</Copyright>
+    <Authors>delixfe</Authors>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Deterministic>true</Deterministic>
+    <Features>debug-determinism</Features>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <!-- https://learn.microsoft.com/dotnet/fundamentals/package-validation/overview -->
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <!-- Allow SourceLink to work for strongly types resource files (SR) by embedding generated files into the PDBs -->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>Unit</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 
 </Project>

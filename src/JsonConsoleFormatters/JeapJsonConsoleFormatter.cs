@@ -10,27 +10,44 @@ using Microsoft.Extensions.Options;
 
 namespace JsonConsoleFormatters;
 
+/// <summary>
+///     An opinionated log message formatter based on SprintBoot's default log message format
+/// </summary>
 public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
 {
+    /// <summary>
+    ///     The name of the formatter.
+    /// </summary>
     public const string FormatterName = "jeap-json";
 
     private static readonly JsonNamingPolicy JsonCamelCaseNamingPolicy = JsonNamingPolicy.CamelCase;
 
     private readonly IDisposable? _optionsReloadToken;
+    private readonly TimeProvider _timeProvider;
 
-    public JeapJsonConsoleFormatter(IOptionsMonitor<JeapJsonConsoleFormatterOptions> options, TimeProvider timeProvider)
+
+    internal JeapJsonConsoleFormatter(IOptionsMonitor<JeapJsonConsoleFormatterOptions> options,
+        TimeProvider timeProvider)
         : base(FormatterName)
     {
         ReloadLoggerOptions(options.CurrentValue);
         _optionsReloadToken = options.OnChange(ReloadLoggerOptions);
-        TimeProvider = timeProvider;
+        _timeProvider = timeProvider;
     }
 
     internal JeapJsonConsoleFormatterOptions FormatterOptions { get; set; }
-    public TimeProvider TimeProvider { get; }
 
+    /// <summary>
+    ///     Disposes the formatter and releases any resources it is using.
+    /// </summary>
     public void Dispose() => _optionsReloadToken?.Dispose();
 
+    /// <summary>
+    ///     Writes a formatted log entry to the <paramref name="textWriter" />.
+    /// </summary>
+    /// <param name="logEntry">The log entry to write.</param>
+    /// <param name="scopeProvider">The provider for the current scope.</param>
+    /// <param name="textWriter">The writer to use to write the log entry.</param>
     public override void Write<TState>(in LogEntry<TState> logEntry, IExternalScopeProvider? scopeProvider,
         TextWriter textWriter)
     {
@@ -51,7 +68,7 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
 
                 // we ignore the TimestampFormat option, one could check for TimestampFormat == "O"
                 writer.WriteString("@timestamp"u8,
-                    FormatterOptions.UseUtcTimestamp ? TimeProvider.GetUtcNow() : TimeProvider.GetLocalNow());
+                    FormatterOptions.UseUtcTimestamp ? _timeProvider.GetUtcNow() : _timeProvider.GetLocalNow());
 
                 writer.WriteString("level"u8, GetLogLevelString(logEntry.LogLevel));
 
@@ -169,11 +186,7 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
                 writer.WriteNumber(key, sbyteValue);
                 break;
             case char charValue:
-#if NETCOREAPP
                 writer.WriteString(key, MemoryMarshal.CreateSpan(ref charValue, 1));
-#else
-                    writer.WriteString(key, charValue.ToString());
-#endif
                 break;
             case decimal decimalValue:
                 writer.WriteNumber(key, decimalValue);

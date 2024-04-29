@@ -3,13 +3,19 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using Microsoft.Extensions.Logging.Console;
 
 namespace JsonConsoleFormatters;
 
 /// <summary>
-///     Options for FlatJsonConsoleFormatter. Scopes are included by default.
+///     Options for <see cref="JeapJsonConsoleFormatter"/>.
 /// </summary>
+/// <remarks>
+/// By default, the formatter sets the Encoder to <see cref="JavaScriptEncoder.UnsafeRelaxedJsonEscaping"/>
+/// and includes scopes.
+/// </remarks>
 public class JeapJsonConsoleFormatterOptions : JsonConsoleFormatterOptions
 {
     /// <summary>
@@ -18,8 +24,19 @@ public class JeapJsonConsoleFormatterOptions : JsonConsoleFormatterOptions
     public JeapJsonConsoleFormatterOptions()
     {
         IncludeScopes = true;
+
+        JsonWriterOptions = new JsonWriterOptions
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping, Indented = false
+        };
     }
 
+    /// <summary>
+    ///     Adds thread name to the log output. Defaults to false
+    /// </summary>
+    /// <remarks>
+    ///     The thread name is stored in the json element "thread_name".
+    /// </remarks>
     public bool IncludeThreadName { get; set; }
 
     /// <summary>
