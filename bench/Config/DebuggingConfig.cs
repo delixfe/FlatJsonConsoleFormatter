@@ -22,6 +22,7 @@ public class DebuggingConfig : ManualConfig
         AddColumnProvider(DefaultColumnProviders.Instance);
         AddColumn(LogicalGroupColumn.Default);
 
+        WithOption(ConfigOptions.StopOnFirstError, true);
         WithOption(ConfigOptions.JoinSummary, true);
     }
 }

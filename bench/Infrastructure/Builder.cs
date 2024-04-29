@@ -20,6 +20,7 @@ public static class Builder
 
     public static readonly Action<JsonConsoleFormatterOptions> UnsafeRelaxedJsonEscaping = o =>
         o.JsonWriterOptions = o.JsonWriterOptions with { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+
     public static readonly Action<JsonConsoleFormatterOptions> Indented = o =>
         o.JsonWriterOptions = o.JsonWriterOptions with { Indented = true };
 
@@ -64,7 +65,7 @@ public static class Builder
         });
 
     public static ILogger CreateJeapJsonLogger(params Action<JeapJsonConsoleFormatterOptions>[] configures) =>
-        CreateLogger(FlatJsonFormatterName, lb =>
+        CreateLogger(JeapJsonConsoleFormatter.FormatterName, lb =>
         {
             lb.AddJeapJsonConsole(o =>
             {
@@ -74,9 +75,13 @@ public static class Builder
                 }
             });
         });
+
     private static ILogger CreateLogger(string formatterName, Action<ILoggingBuilder> addFormatter)
     {
         var services = new ServiceCollection();
+
+        services.AddSingleton(TimeProvider.System);
+
         services.AddLogging(lb =>
         {
             lb.SetMinimumLevel(LogLevel.Trace);
@@ -90,7 +95,8 @@ public static class Builder
         services.RemoveAll<IExternalScopeProvider>();
         services.AddSingleton<IExternalScopeProvider>(AspNetScenario.ScopeProvider);
 
-        return services.BuildServiceProvider().GetRequiredService<ILoggerFactory>()
+        var provider = services.BuildServiceProvider();
+        return provider.GetRequiredService<ILoggerFactory>()
             .CreateLogger("System.Net.Http.HttpClient.SamlAuthHttpClient.LogicalHandler");
     }
 }
