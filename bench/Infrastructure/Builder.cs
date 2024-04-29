@@ -21,6 +21,9 @@ public static class Builder
     public static readonly Action<JsonConsoleFormatterOptions> UnsafeRelaxedJsonEscaping = o =>
         o.JsonWriterOptions = o.JsonWriterOptions with { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
+    public static readonly Action<JsonConsoleFormatterOptions> StrictEscaping = o =>
+        o.JsonWriterOptions = o.JsonWriterOptions with { Encoder = JavaScriptEncoder.Default };
+
     public static readonly Action<JsonConsoleFormatterOptions> Indented = o =>
         o.JsonWriterOptions = o.JsonWriterOptions with { Indented = true };
 
@@ -33,6 +36,7 @@ public static class Builder
     public static readonly Action<JsonConsoleFormatterOptions>[] Defaults =
     {
         DontIncludeScopes, // FlatJson defaults to true
+        UnsafeRelaxedJsonEscaping, // we will always want to use this
         TimestampFormatO,
 #if DEBUG
         Indented,

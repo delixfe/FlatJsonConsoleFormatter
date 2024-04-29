@@ -9,33 +9,26 @@ namespace Benchmarks;
 public class Types
 {
     private ILogger? _flatJsonLogger;
-    private ILogger? _flatJsonLoggerUnsafeRelaxedJsonEscaping;
-
+    private ILogger? _jeapJsonLogger;
     private ILogger? _jsonLogger;
-    private ILogger? _jsonLoggerUnsafeRelaxedJsonEscaping;
 
     [GlobalSetup]
     public void Setup()
     {
         _jsonLogger = Builder.CreateJsonLogger();
-        _jsonLoggerUnsafeRelaxedJsonEscaping = Builder.CreateJsonLogger(Builder.UnsafeRelaxedJsonEscaping);
+        _jeapJsonLogger = Builder.CreateJeapJsonLogger();
         _flatJsonLogger = Builder.CreateFlatJsonLogger();
-        _flatJsonLoggerUnsafeRelaxedJsonEscaping = Builder.CreateFlatJsonLogger(Builder.UnsafeRelaxedJsonEscaping);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Run(ILogger logger) => TypeBased.ForEachDefinition(logger);
 
-
     [Benchmark(Baseline = true, OperationsPerInvoke = TypeBased.DefinitionCount)]
     public void Json() => Run(_jsonLogger!);
 
     [Benchmark(OperationsPerInvoke = TypeBased.DefinitionCount)]
-    public void Json_UnsafeJson() => Run(_jsonLoggerUnsafeRelaxedJsonEscaping!);
+    public void JeapJson() => Run(_jeapJsonLogger!);
 
     [Benchmark(OperationsPerInvoke = TypeBased.DefinitionCount)]
     public void FlatJson() => Run(_flatJsonLogger!);
-
-    [Benchmark(OperationsPerInvoke = TypeBased.DefinitionCount)]
-    public void FlatJson_UnsafeJson() => Run(_flatJsonLoggerUnsafeRelaxedJsonEscaping!);
 }

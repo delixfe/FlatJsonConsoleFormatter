@@ -13,24 +13,24 @@ public class MaxScoped
     private ILogger? _flatJsonLoggerMergeDuplicateKeys;
 
     private ILogger? _jeapJsonLogger;
-    
+
     private ILogger? _jsonLogger;
 
     [GlobalSetup]
     public void Setup()
     {
-        Action<JsonConsoleFormatterOptions>[] defaults = { Builder.IncludeScopes, Builder.UnsafeRelaxedJsonEscaping };
-        
+        Action<JsonConsoleFormatterOptions>[] defaults = { Builder.IncludeScopes };
+
         _jsonLogger = Builder.CreateJsonLogger(defaults);
         _flatJsonLogger = Builder.CreateFlatJsonLogger(defaults);
-        
+
         _jeapJsonLogger = Builder.CreateJeapJsonLogger(defaults);
-        
+
         _flatJsonLogger = Builder.CreateFlatJsonLogger(Builder.IncludeScopes);
         _flatJsonLoggerMergeDuplicateKeys = Builder.CreateFlatJsonLogger(
             defaults.Append(Builder.MergeDuplKeys).ToArray());
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Run(ILogger logger) => AspNetScenario.Max(logger);
 
@@ -39,7 +39,7 @@ public class MaxScoped
 
     [Benchmark]
     public void JeapJson() => Run(_jeapJsonLogger!);
-   
+
     [Benchmark]
     public void FlatJson() => Run(_flatJsonLogger!);
 
