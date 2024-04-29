@@ -28,7 +28,7 @@ public abstract class
 
         // Assert
         logger.Formatted.Should().BeValidJson() //
-            .Subject.Should().HaveElement("Key").Which.Should().HaveValue("Value");
+            .Subject.Should().HaveElement(MappedKey("Key")).Which.Should().HaveValue("Value");
     }
 
     [Fact]
@@ -44,6 +44,6 @@ public abstract class
 
         // Assert
         logger.Formatted.Should().BeValidJson() //
-            .Subject.Should().NotHaveElement("Key");
+            .Subject.Should().NotHaveElement(MappedKey("Key"));
     }
 }

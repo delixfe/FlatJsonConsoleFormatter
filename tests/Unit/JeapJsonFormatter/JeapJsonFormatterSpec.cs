@@ -1,4 +1,5 @@
 using System.Collections.Frozen;
+using System.Text.Json;
 using JsonConsoleFormatters;
 using Microsoft.Extensions.Logging;
 
@@ -21,7 +22,6 @@ public class JeapJsonFormatterSpec : SpecBase<JeapJsonConsoleFormatterOptions>
     public override bool ScopeOutputsMessage { get; } = false;
     public override bool ScopeOutputsOriginalFormat { get; } = false;
 
-
     public override IReadOnlyDictionary<LogLevel, string> LogLevelStrings { get; } = new Dictionary<LogLevel, string>
     {
         // TODO: check against otel
@@ -32,6 +32,8 @@ public class JeapJsonFormatterSpec : SpecBase<JeapJsonConsoleFormatterOptions>
         [LogLevel.Error] = "ERROR",
         [LogLevel.Critical] = "CRITIC"
     }.ToFrozenDictionary();
+
+    public override string MapStateOrScopeElementNames(string name) => JsonNamingPolicy.CamelCase.ConvertName(name);
 
     public override FakeLoggerBuilder<JeapJsonConsoleFormatterOptions> CreateLoggerBuilder() => new(
         (optionsMonitor, timeProvider) => new JeapJsonConsoleFormatter(optionsMonitor, timeProvider),

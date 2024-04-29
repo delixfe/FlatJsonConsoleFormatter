@@ -23,4 +23,10 @@ public abstract class FormatterTestsBase<TFormatter, TFormatterOptions>
 
     public ITestOutputHelper TestOutputHelper { get; }
     public FakeLoggerBuilder<TFormatterOptions> LoggerBuilder { get; }
+
+    public string JsonKeyValue<T>(string key, T value) =>
+        Spec.CreateJsonKeyValuePair(key, value);
+
+    public string MappedKey(string key) =>
+        Spec.MapStateOrScopeElementNames(key);
 }

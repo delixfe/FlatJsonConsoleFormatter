@@ -106,8 +106,8 @@ public abstract class
         if (Spec.OutputsOriginalFormat)
             message.Should().Contain($"\"{Spec.ElementNameOriginalFormat}\":\"{{LogEntryNumber}}\"");
 
-        message.Should().Contain("\"Number\":2");
-        message.Should().Contain("\"AnotherNumber\":3");
+        message.Should().Contain(JsonKeyValue("Number", 2));
+        message.Should().Contain(JsonKeyValue("AnotherNumber", 3));
 
         // depending on the handling of duplicate element names, we cannot validate scope's message or template
         if (Spec.ScopeOutputsOriginalFormat || Spec.ScopeOutputsMessage)
@@ -140,12 +140,14 @@ public abstract class
 
         // Assert
         logger.Formatted.Should().BeValidJson();
+        var message = logger.Formatted!;
 
         // Adaption: don't check for the trailing comma
+        message.Should().Contain(JsonKeyValue("Value", expectedJsonValue));
+        message.Should().Contain(JsonKeyValue("LogEntryValue", expectedJsonValue));
+
         // Assert.Contains("\"Value\":" + expectedJsonValue + ",", logger.Formatted);
         // Assert.Contains("\"LogEntryValue\":" + expectedJsonValue + ",", logger.Formatted);
-        Assert.Contains("\"Value\":" + expectedJsonValue, logger.Formatted);
-        Assert.Contains("\"LogEntryValue\":" + expectedJsonValue, logger.Formatted);
     }
 
     [Theory]
@@ -166,8 +168,8 @@ public abstract class
         // Assert
         logger.Formatted.Should().BeValidJson();
         var message = logger.Formatted!;
-        AssertMessageValue(message, "Value");
-        AssertMessageValue(message, "LogEntryValue");
+        AssertMessageValue(message, Spec.MapStateOrScopeElementNames("Value"));
+        AssertMessageValue(message, Spec.MapStateOrScopeElementNames("LogEntryValue"));
 
         static void AssertMessageValue(string message, string propertyName)
         {
@@ -199,8 +201,9 @@ public abstract class
         // Assert
         logger.Formatted.Should().BeValidJson();
         var message = logger.Formatted!;
-        Assert.Contains("\"ScopeKey\":null", message);
-        Assert.Contains("\"LogKey\":null", message);
+        var x = JsonKeyValue("ScopeKey", (string?)null);
+        Assert.Contains(Spec.CreateJsonKeyWithExplicitNullValue("ScopeKey"), message);
+        Assert.Contains(Spec.CreateJsonKeyWithExplicitNullValue("LogKey"), message);
     }
 
     [Fact]
@@ -219,7 +222,7 @@ public abstract class
         logger.Formatted.Should().BeValidJson();
         var message = logger.Formatted!;
         if (Spec.ScopeOutputsMessage)
-            Assert.Contains("\"Value\":" + 2, message);
+            Assert.Contains(JsonKeyValue("Value", 2), message);
     }
 
     [Theory]

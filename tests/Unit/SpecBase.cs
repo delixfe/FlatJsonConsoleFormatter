@@ -1,4 +1,5 @@
 using System.Collections.Frozen;
+using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Console;
@@ -42,6 +43,24 @@ public abstract class SpecBase<TOptions> where TOptions : JsonConsoleFormatterOp
         [LogLevel.Error] = "Error",
         [LogLevel.Critical] = "Critical"
     }.ToFrozenDictionary();
+
+    // additional functionality - state and scope element names
+    public virtual string MapStateOrScopeElementNames(string name) => name;
+
+    public string CreateJsonKeyValuePair(string key, JsonValue? value)
+    {
+        key = MapStateOrScopeElementNames(key);
+        return $"\"{key}\":{value}";
+    }
+
+    public string CreateJsonKeyValuePair<T>(string key, T value) =>
+        CreateJsonKeyValuePair(key, JsonValue.Create(value));
+
+    public string CreateJsonKeyWithExplicitNullValue(string key)
+    {
+        key = MapStateOrScopeElementNames(key);
+        return $"\"{key}\":null";
+    }
 
     // builder
 

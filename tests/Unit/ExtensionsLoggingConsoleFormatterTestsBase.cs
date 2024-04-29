@@ -71,7 +71,7 @@ public abstract class
 
         // Assert
         logger.Formatted.Should().BeValidJson() //
-            .Subject.Should().HaveElement("Timestamp").Which. //
+            .Subject.Should().HaveElement(Spec.ElementNameTimestamp).Which. //
             Should().MatchRegex(@"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}");
     }
 }

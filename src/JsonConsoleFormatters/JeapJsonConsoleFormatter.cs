@@ -155,6 +155,8 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
     private static void WriteItem(Utf8JsonWriter writer, KeyValuePair<string, object?> item)
     {
         var key = item.Key;
+        // TODO(perf): cache mapped keys
+        key = JsonCamelCaseNamingPolicy.ConvertName(key);
         switch (item.Value)
         {
             case bool boolValue:
