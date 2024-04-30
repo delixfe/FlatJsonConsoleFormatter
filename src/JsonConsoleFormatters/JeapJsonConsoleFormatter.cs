@@ -28,6 +28,18 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
     private readonly IDisposable? _optionsReloadToken;
     private readonly TimeProvider _timeProvider;
 
+
+    /// <summary>
+    ///     Constructor for the JeapJsonConsoleFormatter class.
+    /// </summary>
+    /// <param name="options">Options for the JeapJsonConsoleFormatter.</param>
+    public JeapJsonConsoleFormatter(IOptionsMonitor<JeapJsonConsoleFormatterOptions> options) : this(options,
+        TimeProvider.System)
+    {
+        // Intentionally empty
+    }
+
+
     internal JeapJsonConsoleFormatter(IOptionsMonitor<JeapJsonConsoleFormatterOptions> options,
         TimeProvider timeProvider)
         : base(FormatterName)
