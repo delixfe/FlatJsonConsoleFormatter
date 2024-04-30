@@ -13,6 +13,7 @@ namespace JsonConsoleFormatters;
 /// <summary>
 ///     An opinionated log message formatter based on SprintBoot's default log message format
 /// </summary>
+[ProviderAlias(FormatterName)]
 public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
 {
     /// <summary>
