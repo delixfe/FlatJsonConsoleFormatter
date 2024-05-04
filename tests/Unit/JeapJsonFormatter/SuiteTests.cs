@@ -1,9 +1,10 @@
 using JsonConsoleFormatters;
+using Unit.Suite;
 
 namespace Unit.JeapJsonFormatter;
 
 public class JeapJsonValidJsonFormatterTests :
-    ValidJsonFormatterTestsBase<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions>
+    ValidJsonFormatterTests<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions>
 {
     public JeapJsonValidJsonFormatterTests(ITestOutputHelper testOutputHelper) : base(new JeapJsonFormatterSpec(),
         testOutputHelper)
@@ -11,20 +12,20 @@ public class JeapJsonValidJsonFormatterTests :
     }
 }
 
-public class JeapJsonExtensionsLoggingJsonConsoleFormatterTests :
-    ExtensionsLoggingJsonConsoleFormatterTestsBase<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions>
+public class JeapJsonMsJsonConsoleFormatterTests :
+    MSJsonConsoleFormatterTests<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions>
 {
-    public JeapJsonExtensionsLoggingJsonConsoleFormatterTests(ITestOutputHelper testOutputHelper) : base(
+    public JeapJsonMsJsonConsoleFormatterTests(ITestOutputHelper testOutputHelper) : base(
         new JeapJsonFormatterSpec(),
         testOutputHelper)
     {
     }
 }
 
-public class JeapJsonExtensionsLoggingConsoleFormatterTest :
-    ExtensionsLoggingConsoleFormatterTestsBase<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions>
+public class JeapJsonMsConsoleFormatterTest :
+    MSConsoleFormatterTests<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions>
 {
-    public JeapJsonExtensionsLoggingConsoleFormatterTest(ITestOutputHelper testOutputHelper) : base(
+    public JeapJsonMsConsoleFormatterTest(ITestOutputHelper testOutputHelper) : base(
         new JeapJsonFormatterSpec(),
         testOutputHelper)
     {
@@ -32,7 +33,7 @@ public class JeapJsonExtensionsLoggingConsoleFormatterTest :
 }
 
 public class JeapJsonStateOrScopePropertyTests :
-    StateOrScopePropertyTestsBase<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions>
+    StateOrScopePropertyTests<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions>
 {
     public JeapJsonStateOrScopePropertyTests(ITestOutputHelper testOutputHelper) : base(new JeapJsonFormatterSpec(),
         testOutputHelper)

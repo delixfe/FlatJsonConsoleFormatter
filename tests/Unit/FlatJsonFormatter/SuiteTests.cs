@@ -1,9 +1,10 @@
 using FlatJsonConsoleFormatter;
+using Unit.Suite;
 
 namespace Unit.FlatJsonFormatter;
 
 public class FlatJsonValidJsonFormatterTests :
-    ValidJsonFormatterTestsBase<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter, FlatJsonConsoleFormatterOptions>
+    ValidJsonFormatterTests<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter, FlatJsonConsoleFormatterOptions>
 {
     public FlatJsonValidJsonFormatterTests(ITestOutputHelper testOutputHelper) : base(new FlatJsonFormatterSpec(),
         testOutputHelper)
@@ -11,22 +12,22 @@ public class FlatJsonValidJsonFormatterTests :
     }
 }
 
-public class FlatJsonExtensionsLoggingJsonConsoleFormatterTests :
-    ExtensionsLoggingJsonConsoleFormatterTestsBase<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter,
+public class FlatJsonMsJsonConsoleFormatterTests :
+    MSJsonConsoleFormatterTests<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter,
         FlatJsonConsoleFormatterOptions>
 {
-    public FlatJsonExtensionsLoggingJsonConsoleFormatterTests(ITestOutputHelper testOutputHelper) : base(
+    public FlatJsonMsJsonConsoleFormatterTests(ITestOutputHelper testOutputHelper) : base(
         new FlatJsonFormatterSpec(),
         testOutputHelper)
     {
     }
 }
 
-public class FlatJsonExtensionsLoggingConsoleFormatterTests :
-    ExtensionsLoggingConsoleFormatterTestsBase<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter,
+public class FlatJsonMsConsoleFormatterTests :
+    MSConsoleFormatterTests<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter,
         FlatJsonConsoleFormatterOptions>
 {
-    public FlatJsonExtensionsLoggingConsoleFormatterTests(ITestOutputHelper testOutputHelper) : base(
+    public FlatJsonMsConsoleFormatterTests(ITestOutputHelper testOutputHelper) : base(
         new FlatJsonFormatterSpec(),
         testOutputHelper)
     {
@@ -34,7 +35,7 @@ public class FlatJsonExtensionsLoggingConsoleFormatterTests :
 }
 
 public class FlatJsonStateOrScopePropertyTests :
-    StateOrScopePropertyTestsBase<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter, FlatJsonConsoleFormatterOptions>
+    StateOrScopePropertyTests<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter, FlatJsonConsoleFormatterOptions>
 {
     public FlatJsonStateOrScopePropertyTests(ITestOutputHelper testOutputHelper) : base(new FlatJsonFormatterSpec(),
         testOutputHelper)

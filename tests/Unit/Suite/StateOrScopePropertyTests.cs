@@ -2,15 +2,15 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Newtonsoft.Json.Linq;
 
-namespace Unit;
+namespace Unit.Suite;
 
 public abstract class
-    StateOrScopePropertyTestsBase<TFormatter, TFormatterOptions> : FormatterTestsBase<TFormatter,
+    StateOrScopePropertyTests<TFormatter, TFormatterOptions> : FormatterTestsBase<TFormatter,
     TFormatterOptions>
     where TFormatter : ConsoleFormatter
     where TFormatterOptions : JsonConsoleFormatterOptions, new()
 {
-    protected StateOrScopePropertyTestsBase(SpecBase<TFormatterOptions> spec, ITestOutputHelper testOutputHelper) :
+    protected StateOrScopePropertyTests(SpecBase<TFormatterOptions> spec, ITestOutputHelper testOutputHelper) :
         base(spec,
             testOutputHelper)
     {

@@ -18,6 +18,8 @@ public class JeapJsonFormatterSpec : SpecBase<JeapJsonConsoleFormatterOptions>
 
     public override string ElementNameThreadName { get; } = "thread_name";
 
+    public string ElementNameSeverity { get; } = "severity";
+
     public override bool OutputsOriginalFormat { get; } = false;
     public override bool ScopeOutputsMessage { get; } = false;
     public override bool ScopeOutputsOriginalFormat { get; } = false;

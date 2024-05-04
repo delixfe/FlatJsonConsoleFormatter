@@ -3,15 +3,15 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 
-namespace Unit;
+namespace Unit.Suite;
 
 public abstract class
-    ExtensionsLoggingConsoleFormatterTestsBase<TFormatter, TFormatterOptions> : FormatterTestsBase<TFormatter,
+    MSConsoleFormatterTests<TFormatter, TFormatterOptions> : FormatterTestsBase<TFormatter,
     TFormatterOptions>
     where TFormatter : ConsoleFormatter
     where TFormatterOptions : JsonConsoleFormatterOptions, new()
 {
-    protected ExtensionsLoggingConsoleFormatterTestsBase(SpecBase<TFormatterOptions> spec,
+    protected MSConsoleFormatterTests(SpecBase<TFormatterOptions> spec,
         ITestOutputHelper testOutputHelper) : base(spec, testOutputHelper)
     {
     }

@@ -5,10 +5,10 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 
-namespace Unit;
+namespace Unit.Suite;
 
 public abstract class
-    ExtensionsLoggingJsonConsoleFormatterTestsBase<TFormatter, TFormatterOptions> : FormatterTestsBase<TFormatter,
+    MSJsonConsoleFormatterTests<TFormatter, TFormatterOptions> : FormatterTestsBase<TFormatter,
     TFormatterOptions>
     where TFormatter : ConsoleFormatter
     where TFormatterOptions : JsonConsoleFormatterOptions, new()
@@ -16,7 +16,7 @@ public abstract class
     protected const string _loggerName = C.DefaultLoggerName;
     // protected const string _state = "This is a test, and {curly braces} are just fine!"; 
 
-    protected ExtensionsLoggingJsonConsoleFormatterTestsBase(SpecBase<TFormatterOptions> spec,
+    protected MSJsonConsoleFormatterTests(SpecBase<TFormatterOptions> spec,
         ITestOutputHelper testOutputHelper) : base(spec, testOutputHelper)
     {
     }
