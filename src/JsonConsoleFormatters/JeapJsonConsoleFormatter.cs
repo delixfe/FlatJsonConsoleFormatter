@@ -102,6 +102,8 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
                 if (!string.IsNullOrEmpty(logEntry.EventId.Name))
                     writer.WriteString("eventName"u8, logEntry.EventId.Name);
 
+                writer.WriteNumber("severity"u8, GetOpenTelemetrySeverity(logEntry.LogLevel));
+
                 if (logEntry.Exception != null)
                     writer.WriteString("exception"u8, logEntry.Exception.ToString());
 
@@ -128,7 +130,6 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
         textWriter.Write(Environment.NewLine);
     }
 
-
     private static bool IsReservedKey(string key) => key switch
     {
         // we need to use the original names, as we test with unmapped namecs
@@ -139,6 +140,7 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
         "EventId" => true,
         "EventName" => true,
         "Exception" => true,
+        "Severity" => true,
         _ => false
     };
 
@@ -151,15 +153,31 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
             LogLevel.Warning => "WARN"u8,
             LogLevel.Error => "ERROR"u8,
             LogLevel.Critical => "FATAL"u8,
-            _ => ThrowLogLevelArgumentOutOfRangeException(nameof(logLevel), logLevel)
+            _ => ThrowLogLevelArgumentOutOfRangeExceptionReadOnlySpan(nameof(logLevel), logLevel)
         };
 
+    private static byte GetOpenTelemetrySeverity(LogLevel logLevel) =>
+        logLevel switch
+        {
+            LogLevel.Trace => 1,
+            LogLevel.Debug => 5,
+            LogLevel.Information => 9,
+            LogLevel.Warning => 13,
+            LogLevel.Error => 17,
+            LogLevel.Critical => 21,
+            _ => ThrowLogLevelArgumentOutOfRangeException<byte>(nameof(logLevel), logLevel)
+        };
 
     [DoesNotReturn]
-    private static ReadOnlySpan<byte> ThrowLogLevelArgumentOutOfRangeException(string paraName, LogLevel logLevel) =>
+    private static ReadOnlySpan<byte> ThrowLogLevelArgumentOutOfRangeExceptionReadOnlySpan(string paraName,
+        LogLevel logLevel) =>
         throw new ArgumentOutOfRangeException(paraName, logLevel,
             $"{nameof(LogLevel)} does not contain a value for {logLevel}");
 
+    [DoesNotReturn]
+    private static T ThrowLogLevelArgumentOutOfRangeException<T>(string paraName, LogLevel logLevel) =>
+        throw new ArgumentOutOfRangeException(paraName, logLevel,
+            $"{nameof(LogLevel)} does not contain a value for {logLevel}");
 
     private void AddScopeInformation(Utf8JsonWriter writer, IExternalScopeProvider? scopeProvider,
         HashSet<string> writtenNames)

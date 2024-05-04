@@ -14,6 +14,8 @@ public class
     {
     }
 
+    public new JeapJsonFormatterSpec Spec => (JeapJsonFormatterSpec)base.Spec;
+
     [Theory]
     [CombinatorialData]
     public void Log_IgnoresTimestampFormatAndRespectsUseUtc(bool useUtcTimeStamp, bool unsafeRelaxedJson,
@@ -78,6 +80,7 @@ public class
         }
     }
 
+
     [Fact]
     public void Log_OutputsEventIdAndCategory()
     {
@@ -100,5 +103,48 @@ public class
         log //
             .Should().HaveElement(Spec.ElementNameEventName).Which //
             .Should().BeOfType<JValue>().Which.Value.Should().Be("FortyTwo");
+    }
+
+    [Theory]
+    [CombinatorialData]
+    public void Log_LevelIsOpenTelemetryCompatible(LogLevel level)
+    {
+        if (level == LogLevel.None) return;
+
+        // Arrange
+        var logger = LoggerBuilder.Build();
+
+        // Act
+        logger.Log(level, "Hi!");
+
+        // Assert
+        logger.Formatted.Should().BeValidJson();
+
+        var jToken = JToken.Parse(logger.Formatted!);
+        var actualLevel = jToken[Spec.ElementNameLogLevel]?.Value<string>();
+
+        OpenTelemetryAssertions.AssertShortNameIsMappedCorrectly(level, actualLevel!);
+    }
+
+    [Theory]
+    [CombinatorialData]
+    public void Log_SeverityIsOpenTelemetryCompatible(LogLevel level)
+    {
+        if (level == LogLevel.None) return;
+
+        // Arrange
+        var logger = LoggerBuilder.Build();
+
+        // Act
+        logger.Log(level, "Hi!");
+
+        // Assert
+        logger.Formatted.Should().BeValidJson();
+
+        var jToken = JToken.Parse(logger.Formatted!);
+        jToken.Should().HaveElement(Spec.ElementNameSeverity);
+        var actualSeverity = jToken[Spec.ElementNameSeverity]?.Value<int>();
+
+        OpenTelemetryAssertions.AssertSeverityIsMappedCorrectly(level, actualSeverity!);
     }
 }
