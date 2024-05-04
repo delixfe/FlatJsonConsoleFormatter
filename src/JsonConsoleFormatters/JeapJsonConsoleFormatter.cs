@@ -227,7 +227,7 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
         return result;
     }
 
-    private static void WriteItem(Utf8JsonWriter writer, string? key, object? value)
+    private static void WriteItem(Utf8JsonWriter writer, string key, object? value)
     {
         switch (value)
         {
