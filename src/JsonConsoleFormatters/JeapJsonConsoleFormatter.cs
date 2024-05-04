@@ -150,7 +150,7 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
             LogLevel.Information => "INFO"u8,
             LogLevel.Warning => "WARN"u8,
             LogLevel.Error => "ERROR"u8,
-            LogLevel.Critical => "CRITIC"u8,
+            LogLevel.Critical => "FATAL"u8,
             _ => ThrowLogLevelArgumentOutOfRangeException(nameof(logLevel), logLevel)
         };
 

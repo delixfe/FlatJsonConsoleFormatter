@@ -30,7 +30,7 @@ public class JeapJsonFormatterSpec : SpecBase<JeapJsonConsoleFormatterOptions>
         [LogLevel.Information] = "INFO",
         [LogLevel.Warning] = "WARN",
         [LogLevel.Error] = "ERROR",
-        [LogLevel.Critical] = "CRITIC"
+        [LogLevel.Critical] = "FATAL"
     }.ToFrozenDictionary();
 
     public override bool SupportsTimeProvider { get; } = true;
