@@ -116,7 +116,7 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
                     foreach (var (key, value) in stateProperties)
                     {
                         if (key != "{OriginalFormat}")
-                            WriteItem(writer, GetUniqueKey(key, writtenNames), value);
+                            WriteItem(writer, GetCamelCasedUniqueKey(key, writtenNames), value);
                     }
                 }
 
@@ -132,15 +132,18 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
 
     private static bool IsReservedKey(string key) => key switch
     {
-        // we need to use the original names, as we test with unmapped namecs
-        "Timestamp" => true,
-        "LogLevel" => true,
-        "Category" => true,
-        "Message" => true,
-        "EventId" => true,
-        "EventName" => true,
-        "Exception" => true,
-        "Severity" => true,
+        // we need to check against the normalized aka camelCased keys
+        // default property names - our properties are named differently,
+        // but the filtering is against the incoming keys
+        "timestamp" => true,
+        "logLevel" => true,
+        "category" => true,
+        "message" => true,
+        "eventId" => true,
+        "exception" => true,
+        // additional properties - these are our keys
+        "severity" => true,
+        "eventName" => true,
         _ => false
     };
 
@@ -191,21 +194,23 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
             {
                 foreach (var item in scopeItems)
                 {
-                    WriteItem(writer, GetUniqueKey(item.Key, writtenNames), item.Value);
+                    WriteItem(writer, GetCamelCasedUniqueKey(item.Key, writtenNames), item.Value);
                 }
             }
             else
             {
                 // TODO: always output if scope messages are enabled
-                WriteItem(writer, GetUniqueKey($"scope_{scopeNum}", writtenNames), ToInvariantString(scope));
+                WriteItem(writer, GetCamelCasedUniqueKey($"scope_{scopeNum}", writtenNames), ToInvariantString(scope));
             }
 
             scopeNum += 1;
         }, writer);
     }
 
-    private static string GetUniqueKey(string key, HashSet<string> writtenNames)
+    private static string GetCamelCasedUniqueKey(string key, HashSet<string> writtenNames)
     {
+        // TODO(perf): cache mapped keys
+        key = JsonCamelCaseNamingPolicy.ConvertName(key);
         var result = key;
 
         if (IsReservedKey(key) || writtenNames.Contains(key))
@@ -222,10 +227,8 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
         return result;
     }
 
-    private static void WriteItem(Utf8JsonWriter writer, string key, object? value)
+    private static void WriteItem(Utf8JsonWriter writer, string? key, object? value)
     {
-        // TODO(perf): cache mapped keys
-        key = JsonCamelCaseNamingPolicy.ConvertName(key);
         switch (value)
         {
             case bool boolValue:
