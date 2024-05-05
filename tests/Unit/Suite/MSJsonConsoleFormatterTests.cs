@@ -8,15 +8,16 @@ using Microsoft.Extensions.Logging.Console;
 namespace Unit.Suite;
 
 public abstract class
-    MSJsonConsoleFormatterTests<TFormatter, TFormatterOptions> : FormatterTestsBase<TFormatter,
-    TFormatterOptions>
+    MSJsonConsoleFormatterTests<TFormatter, TFormatterOptions, TSpec> : FormatterTestsBase<TFormatter,
+    TFormatterOptions, TSpec>
     where TFormatter : ConsoleFormatter
     where TFormatterOptions : JsonConsoleFormatterOptions, new()
+    where TSpec : SpecBase<TFormatterOptions>
 {
     protected const string _loggerName = C.DefaultLoggerName;
     // protected const string _state = "This is a test, and {curly braces} are just fine!"; 
 
-    protected MSJsonConsoleFormatterTests(SpecBase<TFormatterOptions> spec,
+    protected MSJsonConsoleFormatterTests(TSpec spec,
         ITestOutputHelper testOutputHelper) : base(spec, testOutputHelper)
     {
     }

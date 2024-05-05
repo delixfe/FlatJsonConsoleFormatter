@@ -7,14 +7,13 @@ using Newtonsoft.Json.Linq;
 namespace Unit.JeapJsonFormatter;
 
 public class
-    JeapJsonFormatterTests : FormatterTestsBase<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions>
+    JeapJsonFormatterTests : FormatterTestsBase<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions,
+    JeapJsonFormatterSpec>
 {
     public JeapJsonFormatterTests(ITestOutputHelper testOutputHelper) : base(new JeapJsonFormatterSpec(),
         testOutputHelper)
     {
     }
-
-    public new JeapJsonFormatterSpec Spec => (JeapJsonFormatterSpec)base.Spec;
 
     [Theory]
     [CombinatorialData]

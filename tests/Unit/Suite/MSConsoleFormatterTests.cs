@@ -6,12 +6,13 @@ using Microsoft.Extensions.Logging.Console;
 namespace Unit.Suite;
 
 public abstract class
-    MSConsoleFormatterTests<TFormatter, TFormatterOptions> : FormatterTestsBase<TFormatter,
-    TFormatterOptions>
+    MSConsoleFormatterTests<TFormatter, TFormatterOptions, TSpec> : FormatterTestsBase<TFormatter,
+    TFormatterOptions, TSpec>
     where TFormatter : ConsoleFormatter
     where TFormatterOptions : JsonConsoleFormatterOptions, new()
+    where TSpec : SpecBase<TFormatterOptions>
 {
-    protected MSConsoleFormatterTests(SpecBase<TFormatterOptions> spec,
+    protected MSConsoleFormatterTests(TSpec spec,
         ITestOutputHelper testOutputHelper) : base(spec, testOutputHelper)
     {
     }

@@ -5,10 +5,11 @@ using Newtonsoft.Json.Linq;
 namespace Unit.Suite;
 
 public abstract class
-    StateOrScopePropertyTests<TFormatter, TFormatterOptions> : FormatterTestsBase<TFormatter,
-    TFormatterOptions>
+    StateOrScopePropertyTests<TFormatter, TFormatterOptions, TSpec> : FormatterTestsBase<TFormatter,
+    TFormatterOptions, TSpec>
     where TFormatter : ConsoleFormatter
     where TFormatterOptions : JsonConsoleFormatterOptions, new()
+    where TSpec : SpecBase<TFormatterOptions>
 {
     public enum PropertyNameDuplication
     {
@@ -17,7 +18,7 @@ public abstract class
         Both
     }
 
-    protected StateOrScopePropertyTests(SpecBase<TFormatterOptions> spec, ITestOutputHelper testOutputHelper) :
+    protected StateOrScopePropertyTests(TSpec spec, ITestOutputHelper testOutputHelper) :
         base(spec,
             testOutputHelper)
     {

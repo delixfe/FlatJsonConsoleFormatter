@@ -4,15 +4,8 @@ using JsonConsoleFormatters;
 namespace Unit.JeapJsonFormatter;
 
 public class
-    JeapJsonFormatterTests_GetCamelCasedUniqueKey : FormatterTestsBase<JeapJsonConsoleFormatter,
-    JeapJsonConsoleFormatterOptions>
+    JeapJsonFormatterTests_GetCamelCasedUniqueKey
 {
-    public JeapJsonFormatterTests_GetCamelCasedUniqueKey(
-        ITestOutputHelper testOutputHelper) : base(new JeapJsonFormatterSpec(),
-        testOutputHelper)
-    {
-    }
-
     [Theory]
     [InlineData("KeyKey", "keyKey")]
     [InlineData("keyKey", "keyKey")]

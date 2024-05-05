@@ -5,12 +5,13 @@ using Newtonsoft.Json.Linq;
 namespace Unit.Suite;
 
 public abstract class
-    ValidJsonFormatterTests<TFormatter, TFormatterOptions> : FormatterTestsBase<TFormatter,
-    TFormatterOptions>
+    ValidJsonFormatterTests<TFormatter, TFormatterOptions, TSpec> : FormatterTestsBase<TFormatter,
+    TFormatterOptions, TSpec>
     where TFormatter : ConsoleFormatter
     where TFormatterOptions : JsonConsoleFormatterOptions, new()
+    where TSpec : SpecBase<TFormatterOptions>
 {
-    protected ValidJsonFormatterTests(SpecBase<TFormatterOptions> spec, ITestOutputHelper testOutputHelper) : base(
+    protected ValidJsonFormatterTests(TSpec spec, ITestOutputHelper testOutputHelper) : base(
         spec, testOutputHelper)
     {
     }

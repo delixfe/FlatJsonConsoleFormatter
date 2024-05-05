@@ -5,7 +5,8 @@ using Unit.Suite;
 namespace Unit.FlatJsonFormatter;
 
 public class FlatJsonValidJsonFormatterTests :
-    ValidJsonFormatterTests<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter, FlatJsonConsoleFormatterOptions>
+    ValidJsonFormatterTests<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter, FlatJsonConsoleFormatterOptions,
+        FlatJsonFormatterSpec>
 {
     public FlatJsonValidJsonFormatterTests(ITestOutputHelper testOutputHelper) : base(new FlatJsonFormatterSpec(),
         testOutputHelper)
@@ -14,8 +15,8 @@ public class FlatJsonValidJsonFormatterTests :
 }
 
 public class FlatJsonMsJsonConsoleFormatterTests :
-    MSJsonConsoleFormatterTests<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter,
-        FlatJsonConsoleFormatterOptions>
+    MSJsonConsoleFormatterTests<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter, FlatJsonConsoleFormatterOptions,
+        FlatJsonFormatterSpec>
 {
     public FlatJsonMsJsonConsoleFormatterTests(ITestOutputHelper testOutputHelper) : base(
         new FlatJsonFormatterSpec(),
@@ -25,8 +26,8 @@ public class FlatJsonMsJsonConsoleFormatterTests :
 }
 
 public class FlatJsonMsConsoleFormatterTests :
-    MSConsoleFormatterTests<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter,
-        FlatJsonConsoleFormatterOptions>
+    MSConsoleFormatterTests<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter, FlatJsonConsoleFormatterOptions,
+        FlatJsonFormatterSpec>
 {
     public FlatJsonMsConsoleFormatterTests(ITestOutputHelper testOutputHelper) : base(
         new FlatJsonFormatterSpec(),
@@ -36,7 +37,8 @@ public class FlatJsonMsConsoleFormatterTests :
 }
 
 public class FlatJsonStateOrScopePropertyTests_MergeDuplicateKeys_False :
-    StateOrScopePropertyTests<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter, FlatJsonConsoleFormatterOptions>
+    StateOrScopePropertyTests<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter, FlatJsonConsoleFormatterOptions,
+        FlatJsonFormatterSpec>
 {
     public FlatJsonStateOrScopePropertyTests_MergeDuplicateKeys_False(ITestOutputHelper testOutputHelper) : base(
         new FlatJsonFormatterSpec(),
@@ -62,7 +64,7 @@ public class FlatJsonStateOrScopePropertyTests_MergeDuplicateKeys_False :
 // MergeDuplicateKeys_True will overwrite properties with the same key
 #if FALSE
 public class FlatJsonStateOrScopePropertyTests_MergeDuplicateKeys_True :
-    StateOrScopePropertyTests<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter, FlatJsonConsoleFormatterOptions>
+    StateOrScopePropertyTests<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter, FlatJsonConsoleFormatterOptions, FlatJsonFormatterSpec>
 {
     public FlatJsonStateOrScopePropertyTests_MergeDuplicateKeys_True(ITestOutputHelper testOutputHelper) : base(new FlatJsonFormatterSpec(),
         testOutputHelper)

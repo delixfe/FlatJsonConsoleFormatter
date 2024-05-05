@@ -5,7 +5,7 @@ using Unit.Suite;
 namespace Unit.JeapJsonFormatter;
 
 public class JeapJsonValidJsonFormatterTests :
-    ValidJsonFormatterTests<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions>
+    ValidJsonFormatterTests<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions, JeapJsonFormatterSpec>
 {
     public JeapJsonValidJsonFormatterTests(ITestOutputHelper testOutputHelper) : base(new JeapJsonFormatterSpec(),
         testOutputHelper)
@@ -14,7 +14,7 @@ public class JeapJsonValidJsonFormatterTests :
 }
 
 public class JeapJsonMsJsonConsoleFormatterTests :
-    MSJsonConsoleFormatterTests<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions>
+    MSJsonConsoleFormatterTests<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions, JeapJsonFormatterSpec>
 {
     public JeapJsonMsJsonConsoleFormatterTests(ITestOutputHelper testOutputHelper) : base(
         new JeapJsonFormatterSpec(),
@@ -24,7 +24,7 @@ public class JeapJsonMsJsonConsoleFormatterTests :
 }
 
 public class JeapJsonMsConsoleFormatterTest :
-    MSConsoleFormatterTests<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions>
+    MSConsoleFormatterTests<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions, JeapJsonFormatterSpec>
 {
     public JeapJsonMsConsoleFormatterTest(ITestOutputHelper testOutputHelper) : base(
         new JeapJsonFormatterSpec(),
@@ -34,7 +34,7 @@ public class JeapJsonMsConsoleFormatterTest :
 }
 
 public class JeapJsonStateOrScopePropertyTests :
-    StateOrScopePropertyTests<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions>
+    StateOrScopePropertyTests<JeapJsonConsoleFormatter, JeapJsonConsoleFormatterOptions, JeapJsonFormatterSpec>
 {
     public JeapJsonStateOrScopePropertyTests(ITestOutputHelper testOutputHelper) : base(new JeapJsonFormatterSpec(),
         testOutputHelper)
