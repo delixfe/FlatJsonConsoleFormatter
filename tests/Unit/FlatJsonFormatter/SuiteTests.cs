@@ -1,4 +1,5 @@
 using FlatJsonConsoleFormatter;
+using Newtonsoft.Json.Linq;
 using Unit.Suite;
 
 namespace Unit.FlatJsonFormatter;
@@ -34,17 +35,43 @@ public class FlatJsonMsConsoleFormatterTests :
     }
 }
 
-public class FlatJsonStateOrScopePropertyTests :
+public class FlatJsonStateOrScopePropertyTests_MergeDuplicateKeys_False :
     StateOrScopePropertyTests<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter, FlatJsonConsoleFormatterOptions>
 {
-    public FlatJsonStateOrScopePropertyTests(ITestOutputHelper testOutputHelper) : base(new FlatJsonFormatterSpec(),
+    public FlatJsonStateOrScopePropertyTests_MergeDuplicateKeys_False(ITestOutputHelper testOutputHelper) : base(
+        new FlatJsonFormatterSpec(),
         testOutputHelper)
     {
     }
 
-    [Theory(Skip = "should be fixed or described as edge case")]
-    [CombinatorialData]
-    public override void
-        DuplicatePropertyNames_NeverOverwritesStandardProperties(PropertyNameDuplicateHandling duplicateHandling) =>
-        base.DuplicatePropertyNames_NeverOverwritesStandardProperties(duplicateHandling);
+    protected override void PropertyIsNotOverwrittenAdditionalAssertions(string key, string elementName,
+        PropertyNameDuplication duplication, string message)
+    {
+        var jToken = JToken.Parse(message);
+
+        jToken.Should().HaveElement($"{elementName}_1");
+
+        if (duplication == PropertyNameDuplication.Both)
+            jToken.Should().HaveElement($"{elementName}_2");
+    }
+
+    protected override void CustomizeLoggerBuilder(FakeLoggerBuilder<FlatJsonConsoleFormatterOptions> builder) =>
+        builder.With(o => o.MergeDuplicateKeys = false);
 }
+
+// MergeDuplicateKeys_True will overwrite properties with the same key
+#if FALSE
+public class FlatJsonStateOrScopePropertyTests_MergeDuplicateKeys_True :
+    StateOrScopePropertyTests<FlatJsonConsoleFormatter.FlatJsonConsoleFormatter, FlatJsonConsoleFormatterOptions>
+{
+    public FlatJsonStateOrScopePropertyTests_MergeDuplicateKeys_True(ITestOutputHelper testOutputHelper) : base(new FlatJsonFormatterSpec(),
+        testOutputHelper)
+    {
+    }
+
+    protected override void CustomizeLoggerBuilder(FakeLoggerBuilder<FlatJsonConsoleFormatterOptions> builder)
+    {
+        builder.With(o => o.MergeDuplicateKeys = true);
+    }
+}
+#endif

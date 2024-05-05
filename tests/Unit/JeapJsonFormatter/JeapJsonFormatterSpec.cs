@@ -14,10 +14,10 @@ public class JeapJsonFormatterSpec : SpecBase<JeapJsonConsoleFormatterOptions>
     public override string ElementNameCategory { get; } = "logger";
     public override string ElementNameEventId { get; } = "eventId";
 
-    public override string ElementNameEventName { get; } = "eventName";
+    // additional attributes
 
-    public override string ElementNameThreadName { get; } = "thread_name";
-
+    public string ElementNameEventName { get; } = "eventName";
+    public string ElementNameThreadName { get; } = "thread_name";
     public string ElementNameSeverity { get; } = "severity";
 
     public override bool OutputsOriginalFormat { get; } = false;
@@ -42,14 +42,6 @@ public class JeapJsonFormatterSpec : SpecBase<JeapJsonConsoleFormatterOptions>
     public override FakeLoggerBuilder<JeapJsonConsoleFormatterOptions> CreateLoggerBuilder() => new(
         (optionsMonitor, timeProvider) => new JeapJsonConsoleFormatter(optionsMonitor, timeProvider),
         Array.Empty<Action<JeapJsonConsoleFormatterOptions>>());
-
-    public override Action<JeapJsonConsoleFormatterOptions> ConfigurePropertyNameDuplicateHandling(
-        PropertyNameDuplicateHandling duplicateHandling) => duplicateHandling switch
-    {
-        PropertyNameDuplicateHandling.Overwrite => o => o.DropDuplicatePropertyKeys = true,
-        PropertyNameDuplicateHandling.UnderscoreIntSuffix => o => o.DropDuplicatePropertyKeys = false,
-        _ => throw new ArgumentOutOfRangeException(nameof(duplicateHandling), duplicateHandling, null)
-    };
 
     public override Action<JeapJsonConsoleFormatterOptions> ConfigureIncludeEventHandling(bool includeEventHandling) =>
         o =>

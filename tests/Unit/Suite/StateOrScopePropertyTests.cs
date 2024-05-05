@@ -10,6 +10,13 @@ public abstract class
     where TFormatter : ConsoleFormatter
     where TFormatterOptions : JsonConsoleFormatterOptions, new()
 {
+    public enum PropertyNameDuplication
+    {
+        Scope,
+        Message,
+        Both
+    }
+
     protected StateOrScopePropertyTests(SpecBase<TFormatterOptions> spec, ITestOutputHelper testOutputHelper) :
         base(spec,
             testOutputHelper)
@@ -49,16 +56,14 @@ public abstract class
             .Subject.Should().NotHaveElement(MappedKey("Key"));
     }
 
-    [Theory]
-    [CombinatorialData]
-    public void DuplicatePropertyNames_NeverLoggedTwice(PropertyNameDuplicateHandling duplicateHandling)
+    [Fact]
+    public void DuplicatePropertyNames_NeverLoggedTwice()
     {
         // Arrange
         var logger = LoggerBuilder
             .AddStaticScope(null, "Key", "FromScope1")
             .AddStaticScope(null, "Key", "FromScope2")
             .With(ConfigActions.IncludeScopes)
-            .With(Spec.ConfigurePropertyNameDuplicateHandling(duplicateHandling))
             .Build();
 
         // Act
@@ -74,46 +79,99 @@ public abstract class
 
     [Theory]
     [CombinatorialData]
-    public virtual void DuplicatePropertyNames_NeverOverwritesStandardProperties(
-        PropertyNameDuplicateHandling duplicateHandling)
+    public void Reserved_Timestamp(PropertyNameDuplication duplication) =>
+        PropertyIsNotOverwritten(Spec.ElementNameTimestamp, Spec.ElementNameTimestamp, duplication);
+
+    [Theory]
+    [CombinatorialData]
+    public void Reserved_LogLevel(PropertyNameDuplication duplication) =>
+        PropertyIsNotOverwritten(Spec.ElementNameLogLevel, Spec.ElementNameLogLevel, duplication);
+
+    [Theory]
+    [CombinatorialData]
+    public void Reserved_Message(PropertyNameDuplication duplication) =>
+        PropertyIsNotOverwritten(Spec.ElementNameMessage, Spec.ElementNameMessage, duplication);
+
+    [Theory]
+    [CombinatorialData]
+    public void Reserved_Exception(PropertyNameDuplication duplication) =>
+        PropertyIsNotOverwritten(Spec.ElementNameException, Spec.ElementNameException, duplication, true);
+
+    [Theory]
+    [CombinatorialData]
+    public void Reserved_Category(PropertyNameDuplication duplication) =>
+        PropertyIsNotOverwritten(Spec.ElementNameCategory, Spec.ElementNameCategory, duplication);
+
+
+    [Theory]
+    [CombinatorialData]
+    public void Reserved_EventId(PropertyNameDuplication duplication) =>
+        PropertyIsNotOverwritten(Spec.ElementNameEventId, Spec.ElementNameEventId, duplication, addEventId: true);
+
+
+    protected virtual void PropertyIsNotOverwritten(
+        string key, string elementName, PropertyNameDuplication duplication,
+        bool addException = false,
+        bool addEventId = false,
+        Action<FakeLoggerBuilder<TFormatterOptions>>? customizeBuilder = null)
     {
         // Arrange
-        var logger = LoggerBuilder
-            .AddStaticScope(null, "Timestamp", "overwritten")
-            .AddStaticScope(null, "LogLevel", "overwritten")
-            .AddStaticScope(null, "Message", "overwritten")
-            .AddStaticScope(null, "Exception", "overwritten")
-            .AddStaticScope(null, "Category", "overwritten")
-            .AddStaticScope(null, "EventId", "overwritten")
+        var builder = LoggerBuilder
             .With(ConfigActions.IncludeScopes)
-            .With(Spec.ConfigurePropertyNameDuplicateHandling(duplicateHandling))
-            .With(Spec.ConfigureIncludeEventHandling(true))
-            .Build();
-        var exception = new Exception("Test exception");
+            .With(Spec.ConfigureIncludeEventHandling(true));
+        customizeBuilder?.Invoke(builder);
+        switch (duplication)
+        {
+            case PropertyNameDuplication.Scope:
+            case PropertyNameDuplication.Both:
+                builder.AddStaticScope(null, key, "overwrittenScope");
+                break;
+        }
 
+        var logger = builder.Build();
+        var exception = addException ? new Exception("Test exception") : null;
+        var eventId = new EventId(42, "42");
+
+        string messageTemplate;
+        object?[] args = [];
         // Act
-        logger.LogInformation(42, exception,
-            "from message: {Timestamp} {LogLevel} {Message} {Exception} {Category} {EventId}",
-            "overwritten", "overwritten", "overwritten", "overwritten", "overwritten", "overwritten");
+        switch (duplication)
+        {
+            case PropertyNameDuplication.Message:
+            case PropertyNameDuplication.Both:
+                messageTemplate = $"from message: {key}:{{{key}}}";
+                args = ["overwrittenMessage"];
+                break;
+            case PropertyNameDuplication.Scope:
+                messageTemplate = "from message";
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(duplication));
+        }
+
+        if (addEventId)
+        {
+            logger.LogInformation(eventId, exception, messageTemplate, args);
+        }
+        else
+        {
+            logger.LogInformation(exception, messageTemplate, args);
+        }
+
 
         // Assert
         logger.Formatted.Should().BeValidJson();
         var message = logger.Formatted!;
         var jtoken = JToken.Parse(message);
-        // issues with FluentAssertions.Json and all non-string values
-        // jtoken.Should().HaveElementSomewhere(Spec.ElementNameTimestamp).Which.Should().HaveValue(C.ExpectedDefaultTimestampStringLocal);
-        if (Spec.SupportsTimeProvider)
-            message.Should().Contain($"\"{Spec.ElementNameTimestamp}\":\"{C.ExpectedDefaultTimestampStringLocal}\"");
-        else
-            message.Should().NotContain($"\"{Spec.ElementNameTimestamp}\":\"overwritten\"");
-        jtoken.Should().HaveElementSomewhere(Spec.ElementNameLogLevel).Which.Should()
-            .HaveValue(Spec.LogLevelStrings[LogLevel.Information]);
-        jtoken.Should().HaveElementSomewhere(Spec.ElementNameMessage).Which.Should()
-            .HaveValue("from message: overwritten overwritten overwritten overwritten overwritten overwritten");
-        var actualException = jtoken.Should().HaveElementSomewhere(Spec.ElementNameException).Which.Value<string>();
-        actualException.Should().Contain(exception.GetType().FullName!);
-        actualException.Should().Contain(exception.Message);
-        jtoken.Should().HaveElementSomewhere(Spec.ElementNameCategory).Which.Should().HaveValue(C.DefaultLoggerName);
-        jtoken.Should().HaveElementSomewhere(Spec.ElementNameEventId).Which.Should().HaveValue("42");
+        jtoken.Should().HaveElementSomewhere(elementName).Which.Should().NotHaveValue("overwrittenScope").And
+            .NotHaveValue("overwrittenMessage");
+
+        PropertyIsNotOverwrittenAdditionalAssertions(key, elementName, duplication, message);
+    }
+
+    protected virtual void PropertyIsNotOverwrittenAdditionalAssertions(string key, string elementName,
+        PropertyNameDuplication duplication, string message)
+    {
+        // no-op
     }
 }

@@ -16,13 +16,27 @@ public abstract class FormatterTestsBase<TFormatter, TFormatterOptions>
     {
         TestOutputHelper = testOutputHelper;
         Spec = spec;
-        LoggerBuilder = spec.CreateLoggerBuilder().WithTestOutputHelper(TestOutputHelper);
     }
 
     public SpecBase<TFormatterOptions> Spec { get; }
 
     public ITestOutputHelper TestOutputHelper { get; }
-    public FakeLoggerBuilder<TFormatterOptions> LoggerBuilder { get; }
+
+    public FakeLoggerBuilder<TFormatterOptions> LoggerBuilder
+    {
+        get
+        {
+            var builder = Spec.CreateLoggerBuilder().WithTestOutputHelper(TestOutputHelper);
+            CustomizeLoggerBuilder(builder);
+            return builder;
+        }
+    }
+
+    protected virtual void CustomizeLoggerBuilder(FakeLoggerBuilder<TFormatterOptions> builder)
+    {
+        // no-op
+    }
+
 
     public string JsonKeyValue<T>(string key, T value) =>
         Spec.CreateJsonKeyValuePair(key, value);

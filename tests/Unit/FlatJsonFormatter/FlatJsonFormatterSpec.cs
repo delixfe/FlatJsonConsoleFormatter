@@ -13,14 +13,6 @@ public class FlatJsonFormatterSpec : SpecBase<FlatJsonConsoleFormatterOptions>
             new FlatJsonConsoleFormatter.FlatJsonConsoleFormatter(optionsMonitor),
         Array.Empty<Action<FlatJsonConsoleFormatterOptions>>());
 
-    public override Action<FlatJsonConsoleFormatterOptions> ConfigurePropertyNameDuplicateHandling(
-        PropertyNameDuplicateHandling duplicateHandling) => duplicateHandling switch
-    {
-        PropertyNameDuplicateHandling.Overwrite => o => o.MergeDuplicateKeys = false,
-        PropertyNameDuplicateHandling.UnderscoreIntSuffix => o => o.MergeDuplicateKeys = true,
-        _ => throw new ArgumentOutOfRangeException(nameof(duplicateHandling), duplicateHandling, null)
-    };
-
     public override Action<FlatJsonConsoleFormatterOptions> ConfigureIncludeEventHandling(bool includeEventHandling) =>
         o => o.IncludeEventId = includeEventHandling;
 }

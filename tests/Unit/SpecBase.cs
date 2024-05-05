@@ -18,9 +18,6 @@ public abstract class SpecBase<TOptions> where TOptions : JsonConsoleFormatterOp
     public virtual string ElementNameCategory { get; } = nameof(_logEntryAttributeNames.Category);
     public virtual string ElementNameEventId { get; } = nameof(_logEntryAttributeNames.EventId);
 
-    // additional attributes
-    public virtual string ElementNameEventName { get; } = string.Empty;
-    public virtual string ElementNameThreadName { get; } = string.Empty;
 
     // additional functionality - template and message
     public virtual bool OutputsOriginalFormat { get; } = true;
@@ -67,9 +64,6 @@ public abstract class SpecBase<TOptions> where TOptions : JsonConsoleFormatterOp
     // builder
 
     public abstract FakeLoggerBuilder<TOptions> CreateLoggerBuilder();
-
-    public abstract Action<TOptions> ConfigurePropertyNameDuplicateHandling(
-        PropertyNameDuplicateHandling duplicateHandling);
 
     public abstract Action<TOptions> ConfigureIncludeEventHandling(bool includeEventHandling);
 }
