@@ -22,7 +22,11 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
 
     private static readonly JsonNamingPolicy JsonCamelCaseNamingPolicy = JsonNamingPolicy.CamelCase;
 
-    [ThreadStatic] private static HashSet<string>? writtenNames;
+    // we use a thread static to avoid allocations
+    // ConsoleLogger uses a thread static StringWriter for the same reason,
+    // and this StringWriter is injected into Write method
+    // there is the dedicated unit test to validate this: MultiThreaded_ThreadLocalVariables
+    [ThreadStatic] private static HashSet<string>? s_writtenNames;
 
     private readonly IDisposable? _optionsReloadToken;
     private readonly TimeProvider _timeProvider;
@@ -70,9 +74,9 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
             return;
         }
 
-        writtenNames?.Clear();
+        s_writtenNames?.Clear();
         // TODO(perf): we cannot detect instances with huge capacities, so how can we reset the capacity to 32
-        writtenNames ??= new HashSet<string>(32);
+        s_writtenNames ??= new HashSet<string>(32);
 
 
         const int DefaultBufferSize = 1024;
@@ -93,7 +97,7 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
                 if (FormatterOptions.IncludeThreadName)
                 {
                     writer.WriteString("thread_name"u8, Thread.CurrentThread.Name);
-                    writtenNames.Add("thread_name");
+                    s_writtenNames.Add("thread_name");
                 }
 
                 writer.WriteString("message"u8, message);
@@ -112,14 +116,14 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
 
 
                 // we handle scopes first, so that these attribute names remain stable(ish)
-                AddScopeInformation(writer, scopeProvider, writtenNames);
+                AddScopeInformation(writer, scopeProvider, s_writtenNames);
 
                 if (logEntry.State is IReadOnlyCollection<KeyValuePair<string, object?>> stateProperties)
                 {
                     foreach (var (key, value) in stateProperties)
                     {
                         if (key != "{OriginalFormat}")
-                            WriteItem(writer, GetCamelCasedUniqueKey(key, writtenNames), value);
+                            WriteItem(writer, GetCamelCasedUniqueKey(key, s_writtenNames), value);
                     }
                 }
 

@@ -20,6 +20,12 @@ public class JeapJsonFormatterSpec : SpecBase<JeapJsonConsoleFormatterOptions>
     public string ElementNameThreadName { get; } = "thread_name";
     public string ElementNameSeverity { get; } = "severity";
 
+    public string[] AdditionalElementNames =>
+        new[] { ElementNameEventName, ElementNameThreadName, ElementNameSeverity };
+
+    public string[] AllElementNames => OfficialElementNames.Concat(AdditionalElementNames).ToArray();
+
+
     public override bool OutputsOriginalFormat { get; } = false;
     public override bool ScopeOutputsMessage { get; } = false;
     public override bool ScopeOutputsOriginalFormat { get; } = false;

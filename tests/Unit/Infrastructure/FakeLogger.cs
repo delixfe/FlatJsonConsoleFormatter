@@ -7,14 +7,12 @@ namespace Unit.Infrastructure;
 
 public class FakeLogger : ILogger
 {
-    private readonly StringWriter _stringWriter = new(new StringBuilder(1024));
-
-    public Action<string>? OnLogFormatted;
-
     public FakeLogger(ConsoleFormatter formatter)
     {
         Formatter = formatter;
     }
+
+    public Action<string?>? OnLogFormatted { get; set; }
 
     public ITestOutputHelper? TestOutputHelper { get; set; }
 
@@ -25,14 +23,18 @@ public class FakeLogger : ILogger
 
     public string? Formatted { get; private set; }
 
+    public Action<StringWriter>? FormatterWriteAction { get; private set; }
 
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
         Func<TState, Exception?, string> formatter)
     {
         var logEntry = new LogEntry<TState>(logLevel, Name, eventId, state, exception, formatter);
-        Formatter.Write(in logEntry, ScopeProvider, _stringWriter);
-        Formatted = _stringWriter.ToString();
-        _stringWriter.GetStringBuilder().Clear();
+
+        FormatterWriteAction = stringWriter => Formatter.Write(in logEntry, ScopeProvider, stringWriter);
+
+        using var stringWriter = new StringWriter(new StringBuilder(1024));
+        FormatterWriteAction(stringWriter);
+        Formatted = stringWriter.ToString();
         TestOutputHelper?.WriteLine(Formatted);
         OnLogFormatted?.Invoke(Formatted);
     }

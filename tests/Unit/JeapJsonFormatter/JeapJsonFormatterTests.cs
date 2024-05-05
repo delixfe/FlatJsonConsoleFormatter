@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using JsonConsoleFormatters;
@@ -145,5 +147,71 @@ public class
         var actualSeverity = jToken[Spec.ElementNameSeverity]?.Value<int>();
 
         OpenTelemetryAssertions.AssertSeverityIsMappedCorrectly(level, actualSeverity!);
+    }
+
+    [Fact]
+    public void MultiThreaded_ThreadLocalVariables()
+    {
+        const int threadCount = 10;
+        const int iterationsPerThread = 1000;
+
+        // Arrange
+        ConcurrentQueue<string?> _formattedQueue = new();
+        const int repeatKey = 10;
+        var builder = LoggerBuilder //
+            .With(ConfigActions.IncludeScopes) //
+            .WithTestOutputHelper(null) // don't write all tests to the console
+            .WithOnLogFormatted(msg => _formattedQueue.Enqueue(msg));
+
+        Array.ForEach(Spec.AllElementNames, name => builder.AddStaticScope(null, name, "fromScope"));
+        for (var i = 0; i < repeatKey; i++)
+        {
+            builder.AddStaticScope(null, "Key", "keyFromScope");
+        }
+
+        var logger = builder.Build();
+
+        var msgBuilder = new StringBuilder();
+        msgBuilder.Append("from message: ");
+        Array.ForEach(Spec.AllElementNames, name => msgBuilder.Append($"{name}:{{{name}}} "));
+        var msg = msgBuilder.ToString();
+        var args = new object[Spec.AllElementNames.Length];
+        Array.Fill(args, "fromMessage");
+        var eventId = new EventId(42, "FortyTwo");
+        var exception = new Exception("ex");
+        var threads = new Thread[threadCount];
+
+        // Act
+        var action = () =>
+        {
+            for (var i = 0; i < iterationsPerThread; i++)
+            {
+                logger.LogInformation(eventId, exception, msg, args);
+            }
+        };
+
+        for (var i = 0; i < threadCount; i++)
+        {
+            threads[i] = new Thread(new ThreadStart(action));
+            threads[i].Start();
+        }
+
+        Array.ForEach(threads, t => t.Join());
+
+
+        // Assert
+        var formatteds = _formattedQueue.ToArray();
+        formatteds.Should().HaveCount(threadCount * iterationsPerThread);
+
+        var first = formatteds.First();
+        TestOutputHelper.WriteLine(first);
+        first.Should().BeValidJson();
+
+        Parallel.For(1, threadCount * iterationsPerThread, (i, _) => Assert.Equal(first, formatteds[i]));
+        foreach (var formatted in _formattedQueue)
+        {
+            // formatted.Should().Be(first);
+            Assert.Equal(first, formatted);
+        }
     }
 }

@@ -12,9 +12,9 @@ public class FakeLoggerBuilder<TOptions> where TOptions : JsonConsoleFormatterOp
     private readonly Func<IOptionsMonitor<TOptions>, TimeProvider, ConsoleFormatter> _factory;
     private readonly DateTimeOffset? _startTimestamp = null;
     private readonly TimeZoneInfo? _timeZone = null;
+    private Action<string?>? _onLogFormatted;
     private List<StaticScope>? _scopes;
     private ITestOutputHelper? _testOutputHelper;
-
 
     public FakeLoggerBuilder(Func<IOptionsMonitor<TOptions>, TimeProvider, ConsoleFormatter> factory,
         IEnumerable<Action<TOptions>> preConfigures)
@@ -38,6 +38,12 @@ public class FakeLoggerBuilder<TOptions> where TOptions : JsonConsoleFormatterOp
     public FakeLoggerBuilder<TOptions> WithStaticScopes(params StaticScope[] scopes)
     {
         _scopes = scopes.ToList();
+        return this;
+    }
+
+    public FakeLoggerBuilder<TOptions> WithOnLogFormatted(Action<string?> onLogFormatted)
+    {
+        _onLogFormatted = onLogFormatted;
         return this;
     }
 
@@ -72,6 +78,8 @@ public class FakeLoggerBuilder<TOptions> where TOptions : JsonConsoleFormatterOp
         {
             logger.ScopeProvider = new StaticExternalScopeProvider(_scopes);
         }
+
+        logger.OnLogFormatted = _onLogFormatted;
 
         return logger;
     }

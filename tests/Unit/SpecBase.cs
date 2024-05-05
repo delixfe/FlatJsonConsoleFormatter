@@ -18,6 +18,12 @@ public abstract class SpecBase<TOptions> where TOptions : JsonConsoleFormatterOp
     public virtual string ElementNameCategory { get; } = nameof(_logEntryAttributeNames.Category);
     public virtual string ElementNameEventId { get; } = nameof(_logEntryAttributeNames.EventId);
 
+    public string[] OfficialElementNames => new[]
+    {
+        ElementNameTimestamp, ElementNameLogLevel, ElementNameMessage, ElementNameException, ElementNameCategory,
+        ElementNameEventId
+    };
+
 
     // additional functionality - template and message
     public virtual bool OutputsOriginalFormat { get; } = true;
