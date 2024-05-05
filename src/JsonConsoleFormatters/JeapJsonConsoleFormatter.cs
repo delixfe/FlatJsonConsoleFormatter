@@ -91,7 +91,10 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
                 writer.WriteString("logger"u8, logEntry.Category);
 
                 if (FormatterOptions.IncludeThreadName)
+                {
                     writer.WriteString("thread_name"u8, Thread.CurrentThread.Name);
+                    writtenNames.Add("thread_name");
+                }
 
                 writer.WriteString("message"u8, message);
 
@@ -132,16 +135,13 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
 
     private static bool IsReservedKey(string key) => key switch
     {
-        // we need to check against the normalized aka camelCased keys
-        // default property names - our properties are named differently,
-        // but the filtering is against the incoming keys
-        "timestamp" => true,
-        "logLevel" => true,
-        "category" => true,
+        "@timestamp" => true,
+        "level" => true,
+        "logger" => true,
         "message" => true,
         "eventId" => true,
         "exception" => true,
-        // additional properties - these are our keys
+        // additional properties
         "severity" => true,
         "eventName" => true,
         _ => false
@@ -207,7 +207,7 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
         }, writer);
     }
 
-    private static string GetCamelCasedUniqueKey(string key, HashSet<string> writtenNames)
+    internal static string GetCamelCasedUniqueKey(string key, HashSet<string> writtenNames)
     {
         // TODO(perf): cache mapped keys
         key = JsonCamelCaseNamingPolicy.ConvertName(key);
