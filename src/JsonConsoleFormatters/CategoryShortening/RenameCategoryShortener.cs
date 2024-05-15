@@ -1,20 +1,6 @@
-using System.Collections;
 using System.Text;
 
 namespace JsonConsoleFormatters.CategoryShortening;
-
-/// <summary>
-///     Interface for category shortening.
-/// </summary>
-internal interface ICategoryShortener
-{
-    /// <summary>
-    ///     Shortens the given category.
-    /// </summary>
-    /// <param name="category">The category to shorten.</param>
-    /// <returns>A read-only span of bytes representing the shortened category.</returns>
-    public byte[] Shorten(string category);
-}
 
 /// <summary>
 ///     Class for renaming categories.
@@ -76,33 +62,5 @@ internal class RenameCategoryShortener : ICategoryShortener
         }
 
         return _encoding.GetBytes(category);
-    }
-}
-
-internal class CachingCategoryShortener : ICategoryShortener
-{
-    // see https://www.hanselman.com/blog/differences-between-hashtable-vs-dictonary-vs-concurrentdictionary-vs-immutabledictionary
-    private readonly Hashtable _cache = new();
-    private readonly ICategoryShortener _shortener;
-
-    public CachingCategoryShortener(ICategoryShortener shortener)
-    {
-        _shortener = shortener;
-    }
-
-    public byte[] Shorten(string category)
-    {
-        // ReSharper disable once InconsistentlySynchronizedField
-        var result = (byte[]?)_cache[category];
-        if (result is null)
-        {
-            result = _shortener.Shorten(category);
-            lock (_cache.SyncRoot)
-            {
-                _cache.Add(category, result);
-            }
-        }
-
-        return result;
     }
 }
