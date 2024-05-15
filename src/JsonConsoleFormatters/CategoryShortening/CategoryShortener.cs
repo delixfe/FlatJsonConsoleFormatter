@@ -83,7 +83,6 @@ internal class CachingCategoryShortener : ICategoryShortener
 {
     // see https://www.hanselman.com/blog/differences-between-hashtable-vs-dictonary-vs-concurrentdictionary-vs-immutabledictionary
     private readonly Hashtable _cache = new();
-    private readonly object _cacheLock = new();
     private readonly ICategoryShortener _shortener;
 
     public CachingCategoryShortener(ICategoryShortener shortener)
@@ -98,7 +97,7 @@ internal class CachingCategoryShortener : ICategoryShortener
         if (result is null)
         {
             result = _shortener.Shorten(category);
-            lock (_cacheLock)
+            lock (_cache.SyncRoot)
             {
                 _cache.Add(category, result);
             }

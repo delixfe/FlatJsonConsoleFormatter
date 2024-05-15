@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using JsonConsoleFormatters.CategoryShortening;
 
 namespace Unit.JeapJsonFormatter.CategoryShortening;
@@ -15,11 +16,10 @@ public class CachingCategoryShortenerTests
         var innerShortener = new RenameCategoryShortener(
             new Dictionary<string, string> { ["LongName."] = "L." });
         var subject = new CachingCategoryShortener(innerShortener);
-        var inputs = Enumerable.Range(0, categoryCount).Select(i => $"LongName.{i:000}").ToArray();
-        var expectedByteArrays = inputs.Select(input => innerShortener.Shorten(input)).ToArray();
+        var inputs = Enumerable.Range(0, categoryCount).Select(i => $"LongName.{i:000}").ToList();
+        var expectedByteArrays = inputs.Select(input => subject.Shorten(input)).ToList();
         var threads = new Thread[threadCount];
-        Exception? exception = null;
-
+        var exceptions = new ConcurrentBag<Exception>();
 
         // Act and Assert
         var action = () =>
@@ -38,7 +38,7 @@ public class CachingCategoryShortenerTests
             }
             catch (Exception e)
             {
-                exception = e;
+                exceptions.Add(e);
             }
         };
 
@@ -50,9 +50,9 @@ public class CachingCategoryShortenerTests
 
         Array.ForEach(threads, t => t.Join());
 
-        if (exception != null)
+        if (exceptions.Count > 0)
         {
-            throw exception;
+            throw new AggregateException(exceptions);
         }
     }
 }
