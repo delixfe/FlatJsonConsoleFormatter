@@ -32,6 +32,8 @@ public class JeapJsonConsoleFormatterOptions : JsonConsoleFormatterOptions
         };
     }
 
+    public Dictionary<string, string> LoggerRenameConfiguration { get; set; } = new();
+
     /// <summary>
     ///     Adds thread name to the log output. Defaults to false
     /// </summary>

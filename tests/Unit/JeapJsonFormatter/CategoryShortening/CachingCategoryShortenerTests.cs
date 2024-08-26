@@ -17,7 +17,7 @@ public class CachingCategoryShortenerTests
             new Dictionary<string, string> { ["LongName."] = "L." });
         var subject = new CachingCategoryShortener(innerShortener);
         var inputs = Enumerable.Range(0, categoryCount).Select(i => $"LongName.{i:000}").ToList();
-        var expectedByteArrays = inputs.Select(input => subject.Shorten(input)).ToList();
+        var expectedByteArrays = inputs.Select(input => subject.Shorten(input).ToArray()).ToList();
         var threads = new Thread[threadCount];
         var exceptions = new ConcurrentBag<Exception>();
 
@@ -30,7 +30,7 @@ public class CachingCategoryShortenerTests
                 {
                     var categoryIndex = i % categoryCount;
 
-                    var actual = subject.Shorten(inputs[categoryIndex]);
+                    var actual = subject.Shorten(inputs[categoryIndex]).ToArray();
                     var expectedBytes = expectedByteArrays[categoryIndex];
 
                     Assert.Same(expectedBytes, actual);

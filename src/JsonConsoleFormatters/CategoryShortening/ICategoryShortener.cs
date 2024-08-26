@@ -10,5 +10,5 @@ internal interface ICategoryShortener
     /// </summary>
     /// <param name="category">The category to shorten.</param>
     /// <returns>A read-only span of bytes representing the shortened category.</returns>
-    public byte[] Shorten(string category);
+    public ReadOnlySpan<byte> Shorten(string category);
 }

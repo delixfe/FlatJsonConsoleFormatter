@@ -13,13 +13,13 @@ internal class CachingCategoryShortener : ICategoryShortener
         _shortener = shortener;
     }
 
-    public byte[] Shorten(string category)
+    public ReadOnlySpan<byte> Shorten(string category)
     {
         // ReSharper disable once InconsistentlySynchronizedField
         var result = (byte[]?)_cache[category];
         if (result is null)
         {
-            result = _shortener.Shorten(category);
+            result = _shortener.Shorten(category).ToArray();
             lock (_cache.SyncRoot)
             {
                 _cache.Add(category, result);

@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Text;
 
 namespace JsonConsoleFormatters.CategoryShortening;
@@ -8,7 +9,7 @@ namespace JsonConsoleFormatters.CategoryShortening;
 /// </summary>
 internal class RenameCategoryShortener : ICategoryShortener
 {
-    private readonly Dictionary<string, string> _config;
+    private readonly ImmutableDictionary<string, string> _config;
     private readonly Encoding _encoding = new UTF8Encoding(false);
 
     /// <summary>
@@ -17,7 +18,7 @@ internal class RenameCategoryShortener : ICategoryShortener
     /// <param name="mappings">The mappings to use for renaming categories.</param>
     public RenameCategoryShortener(IEnumerable<KeyValuePair<string, string>> mappings)
     {
-        _config = new Dictionary<string, string>(mappings);
+        _config = mappings.ToImmutableDictionary();
     }
 
 
@@ -26,11 +27,11 @@ internal class RenameCategoryShortener : ICategoryShortener
     /// </summary>
     /// <param name="category">The category to shorten.</param>
     /// <returns>A read-only span of bytes representing the shortened category.</returns>
-    public byte[] Shorten(string category)
+    public ReadOnlySpan<byte> Shorten(string category)
     {
         if (category.Length == 0)
         {
-            return Array.Empty<byte>();
+            return ReadOnlySpan<byte>.Empty;
         }
 
 
