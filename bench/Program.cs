@@ -9,20 +9,19 @@ internal class Program
 {
     private static int Main(string[] args)
     {
-        var debuggingConfig = new DebuggingConfig();
-        var releaseConfig = new ReleaseConfig();
-
         IConfig config;
 
 #if DEBUG
+        var debuggingConfig = new DebuggingConfig();
         config = debuggingConfig;
 #else
+        var releaseConfig = new ReleaseConfig();
         config = releaseConfig;
 #endif
 
         return BenchmarkSwitcher
             .FromAssembly(typeof(Program).Assembly)
-            .RunAll(config, args)
+            .Run(args, config)
             .ToExitCode();
     }
 }
