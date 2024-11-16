@@ -74,10 +74,14 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
             return;
         }
 
-        s_writtenNames?.Clear();
-        // TODO(perf): we cannot detect instances with huge capacities, so how can we reset the capacity to 32
-        s_writtenNames ??= new HashSet<string>(32);
-
+        if (s_writtenNames is { } nonNull)
+        {
+            nonNull.Clear();
+        }
+        else
+        {
+            s_writtenNames = new HashSet<string>(32, StringComparer.Ordinal);
+        }
 
         const int DefaultBufferSize = 1024;
         using (var output = new PooledByteBufferWriter(DefaultBufferSize))
