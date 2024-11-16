@@ -42,6 +42,29 @@ public abstract class
     }
 
     [Fact]
+    public void ScopeNotEnumerable_ContainsScopeText()
+    {
+        // Arrange
+        var logger = LoggerBuilder
+            .With(o => o.IncludeScopes = true) //
+            .Build();
+
+        // Act
+        using (logger.BeginScope("text1"))
+        using (logger.BeginScope("text2"))
+        {
+            logger.LogInformation("Hello, world!");
+        }
+
+        // Assert
+        var json = logger.Formatted.Should().BeValidJson().Subject;
+        // we check only that the values exist
+        var values = json.Root.Children<JProperty>().Select(p => p.Value.ToString()).ToList();
+        values.Should().Contain("text1");
+        values.Should().Contain("text1");
+    }
+
+    [Fact]
     public void ScopeNotEnabled_DoesNotContainScopeProperties()
     {
         // Arrange
