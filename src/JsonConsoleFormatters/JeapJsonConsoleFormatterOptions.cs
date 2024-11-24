@@ -33,12 +33,21 @@ public class JeapJsonConsoleFormatterOptions : JsonConsoleFormatterOptions
     }
 
     /// <summary>
-    ///     Adds thread name to the log output. Defaults to false
+    ///     Determines whether a sequence number is included in the log output. Defaults to true.
     /// </summary>
     /// <remarks>
-    ///     The thread name is stored in the json element "thread_name".
+    ///     The sequence number is stored in the JSON element "sequence".
+    /// </remarks>
+    public bool IncludeSequence { get; set; } = true;
+
+    /// <summary>
+    ///     Determines whether a thread-name to the log output. Defaults to false
+    /// </summary>
+    /// <remarks>
+    ///     The thread name is stored in the JSON element "thread_name".
     /// </remarks>
     public bool IncludeThreadName { get; set; }
+
 
     // /// <summary>
     // ///     Whether to include the seldom used EventId field. Defaults to false
@@ -48,7 +57,7 @@ public class JeapJsonConsoleFormatterOptions : JsonConsoleFormatterOptions
     /// <summary>
     ///     Determines whether to silently drop properties with duplicate keys. Defaults to false.
     ///     If a log property is repeated from multiple sources, this controls whether the formatter silently drops
-    ///     the duplicated property, or if set to false will append a number to the key to deduplicate them.
+    ///     the duplicated property or if set to false will append a number to the key to deduplicate them.
     /// </summary>
     /// <remarks>
     ///     <para>

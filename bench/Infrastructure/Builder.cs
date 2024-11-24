@@ -11,39 +11,6 @@ namespace Benchmarks.Infrastructure;
 
 public static class Builder
 {
-    public const string FlatJsonFormatterName = "flat-json";
-    public const string JsonFormatterName = ConsoleFormatterNames.Json;
-    public static readonly Action<ConsoleFormatterOptions> TimestampFormatO = o => o.TimestampFormat = "O";
-    public static readonly Action<ConsoleFormatterOptions> UseUtcTimestamp = o => o.UseUtcTimestamp = false;
-    public static readonly Action<ConsoleFormatterOptions> IncludeScopes = o => o.IncludeScopes = true;
-    public static readonly Action<ConsoleFormatterOptions> DontIncludeScopes = o => o.IncludeScopes = false;
-
-    public static readonly Action<JsonConsoleFormatterOptions> UnsafeRelaxedJsonEscaping = o =>
-        o.JsonWriterOptions = o.JsonWriterOptions with { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
-
-    public static readonly Action<JsonConsoleFormatterOptions> StrictEscaping = o =>
-        o.JsonWriterOptions = o.JsonWriterOptions with { Encoder = JavaScriptEncoder.Default };
-
-    public static readonly Action<JsonConsoleFormatterOptions> Indented = o =>
-        o.JsonWriterOptions = o.JsonWriterOptions with { Indented = true };
-
-    public static readonly Action<FlatJsonConsoleFormatterOptions> TruncateCategory = o => o.TruncateCategory = true;
-    public static readonly Action<FlatJsonConsoleFormatterOptions> IncludeEventId = o => o.IncludeEventId = true;
-
-    public static readonly Action<FlatJsonConsoleFormatterOptions>
-        MergeDuplKeys = o => o.MergeDuplicateKeys = true;
-
-    public static readonly Action<JsonConsoleFormatterOptions>[] Defaults =
-    {
-        DontIncludeScopes, // FlatJson defaults to true
-        UnsafeRelaxedJsonEscaping, // we will always want to use this
-        TimestampFormatO,
-#if DEBUG
-        Indented,
-#endif
-    };
-
-
     public static ILogger CreateJsonLogger(params Action<JsonConsoleFormatterOptions>[] configures) =>
         CreateLogger(JsonFormatterName, lb =>
         {
@@ -103,4 +70,56 @@ public static class Builder
         return provider.GetRequiredService<ILoggerFactory>()
             .CreateLogger("System.Net.Http.HttpClient.SamlAuthHttpClient.LogicalHandler");
     }
+
+    #region flat-json
+
+    public const string FlatJsonFormatterName = "flat-json";
+    public static readonly Action<FlatJsonConsoleFormatterOptions> TruncateCategory = o => o.TruncateCategory = true;
+    public static readonly Action<FlatJsonConsoleFormatterOptions> IncludeEventId = o => o.IncludeEventId = true;
+
+    public static readonly Action<FlatJsonConsoleFormatterOptions>
+        MergeDuplKeys = o => o.MergeDuplicateKeys = true;
+
+    #endregion
+
+    #region jeap-json
+
+    public static readonly Action<JeapJsonConsoleFormatterOptions> IncludeSequence = o => o.IncludeSequence = true;
+    public static readonly Action<JeapJsonConsoleFormatterOptions> DontIncludeSequence = o => o.IncludeSequence = false;
+
+    #endregion
+
+    #region Consle.ConsoleFormatter
+
+    public static readonly Action<ConsoleFormatterOptions> TimestampFormatO = o => o.TimestampFormat = "O";
+    public static readonly Action<ConsoleFormatterOptions> DontIncludeScopes = o => o.IncludeScopes = false;
+    public static readonly Action<ConsoleFormatterOptions> UseUtcTimestamp = o => o.UseUtcTimestamp = false;
+    public static readonly Action<ConsoleFormatterOptions> IncludeScopes = o => o.IncludeScopes = true;
+
+    #endregion
+
+    #region Console.JsonConsoleFormatter
+
+    public static readonly Action<JsonConsoleFormatterOptions> StrictEscaping = o =>
+        o.JsonWriterOptions = o.JsonWriterOptions with { Encoder = JavaScriptEncoder.Default };
+
+    public const string JsonFormatterName = ConsoleFormatterNames.Json;
+
+    public static readonly Action<JsonConsoleFormatterOptions> UnsafeRelaxedJsonEscaping = o =>
+        o.JsonWriterOptions = o.JsonWriterOptions with { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+
+    public static readonly Action<JsonConsoleFormatterOptions> Indented = o =>
+        o.JsonWriterOptions = o.JsonWriterOptions with { Indented = true };
+
+    public static readonly Action<JsonConsoleFormatterOptions>[] Defaults =
+    {
+        DontIncludeScopes, // FlatJson defaults to true
+        UnsafeRelaxedJsonEscaping, // we will always want to use this
+        TimestampFormatO,
+#if DEBUG
+        Indented,
+#endif
+    };
+
+    #endregion
 }

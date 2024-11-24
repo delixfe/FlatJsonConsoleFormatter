@@ -16,7 +16,6 @@ public class ReleaseConfig : ManualConfig
     {
         AddDefaults();
         AddJob(Job.Default
-                .WithWarmupCount(1) // 1 warmup is enough for our purpose
                 .WithMinIterationCount(15)
                 .WithMaxIterationCount(100) // we don't want to run more that 100 iterations
                 .DontEnforcePowerPlan() // make sure BDN does not try to enforce High Performance power plan on Windows

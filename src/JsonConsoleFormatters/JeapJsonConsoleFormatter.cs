@@ -31,6 +31,8 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
     private readonly IDisposable? _optionsReloadToken;
     private readonly TimeProvider _timeProvider;
 
+    private ulong _sequence;
+
 
     /// <summary>
     ///     Constructor for the JeapJsonConsoleFormatter class.
@@ -112,6 +114,9 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
         // all fields more relevant for filtering but not human reading 
 
         writer.WriteNumber("severity"u8, GetOpenTelemetrySeverity(logEntry.LogLevel));
+
+        if (FormatterOptions.IncludeSequence)
+            writer.WriteNumber("sequence"u8, Interlocked.Increment(ref _sequence));
 
         if (FormatterOptions.IncludeThreadName)
             writer.WriteString("thread_name"u8, Thread.CurrentThread.Name);

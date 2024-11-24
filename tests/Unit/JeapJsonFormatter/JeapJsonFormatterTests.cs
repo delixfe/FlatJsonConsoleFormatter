@@ -72,7 +72,7 @@ public class
             // Assert
             logger.Formatted.Should().BeValidJson();
             JToken.Parse(logger.Formatted!) //
-                .Should().HaveElement(Spec.ElementNameThreadName).Which //
+                .Should().HaveElement(JeapJsonFormatterSpec.ElementNameThreadName).Which //
                 .Should().BeOfType<JValue>().Which.Value.Should().Be(expectedName);
         }
         finally
@@ -81,6 +81,53 @@ public class
         }
     }
 
+    [Fact]
+    public void Log_IncludeSequence_OutputsFirstSequenceNumber()
+    {
+        // Arrange
+        var logger = LoggerBuilder.With(o => o.IncludeSequence = true).Build();
+
+        // Act
+        logger.LogInformation("Hi!");
+
+        // Assert
+        logger.Formatted.Should().BeValidJson();
+        JToken.Parse(logger.Formatted!) //
+            .Should().HaveElement(JeapJsonFormatterSpec.ElementNameSequence).Which //
+            .Should().BeOfType<JValue>().Which.Value.Should().Be(1);
+    }
+
+
+    public static IEnumerable<object[]> ConfigurableInactiveFields()
+    {
+        yield return
+        [
+            new Action<JeapJsonConsoleFormatterOptions>(o => o.IncludeSequence = false),
+            JeapJsonFormatterSpec.ElementNameSequence
+        ];
+        yield return
+        [
+            new Action<JeapJsonConsoleFormatterOptions>(o => o.IncludeThreadName = false),
+            JeapJsonFormatterSpec.ElementNameThreadName
+        ];
+    }
+
+    [Theory]
+    [MemberData(nameof(ConfigurableInactiveFields))]
+    public void Log_IncludeConfigurable_False_DoesNotOutputField(Action<JeapJsonConsoleFormatterOptions> configure,
+        string fieldName)
+    {
+        // Arrange
+        var logger = LoggerBuilder.With(configure).Build();
+
+        // Act
+        logger.LogInformation("Hi!");
+
+        // Assert
+        logger.Formatted.Should().BeValidJson();
+        JToken.Parse(logger.Formatted!) //
+            .Should().NotHaveElement(fieldName);
+    }
 
     [Fact]
     public void Log_OutputsEventIdAndCategory()
@@ -102,7 +149,7 @@ public class
             .Should().BeOfType<JValue>().Which.Value.Should().Be(41);
 
         log //
-            .Should().HaveElement(Spec.ElementNameEventName).Which //
+            .Should().HaveElement(JeapJsonFormatterSpec.ElementNameEventName).Which //
             .Should().BeOfType<JValue>().Which.Value.Should().Be("FortyTwo");
     }
 
@@ -143,8 +190,8 @@ public class
         logger.Formatted.Should().BeValidJson();
 
         var jToken = JToken.Parse(logger.Formatted!);
-        jToken.Should().HaveElement(Spec.ElementNameSeverity);
-        var actualSeverity = jToken[Spec.ElementNameSeverity]?.Value<int>();
+        jToken.Should().HaveElement(JeapJsonFormatterSpec.ElementNameSeverity);
+        var actualSeverity = jToken[JeapJsonFormatterSpec.ElementNameSeverity]?.Value<int>();
 
         OpenTelemetryAssertions.AssertSeverityIsMappedCorrectly(level, actualSeverity!);
     }
@@ -160,6 +207,7 @@ public class
         const int repeatKey = 10;
         var builder = LoggerBuilder //
             .With(ConfigActions.IncludeScopes) //
+            .With(o => o.IncludeSequence = false) //
             .WithTestOutputHelper(null) // don't write all tests to the console
             .WithOnLogFormatted(msg => _formattedQueue.Enqueue(msg));
 

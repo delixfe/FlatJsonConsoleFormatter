@@ -16,12 +16,14 @@ public class JeapJsonFormatterSpec : SpecBase<JeapJsonConsoleFormatterOptions>
 
     // additional attributes
 
-    public string ElementNameEventName { get; } = "eventName";
-    public string ElementNameThreadName { get; } = "thread_name";
-    public string ElementNameSeverity { get; } = "severity";
+    public static string ElementNameEventName { get; } = "eventName";
+    public static string ElementNameThreadName { get; } = "thread_name";
+    public static string ElementNameSeverity { get; } = "severity";
+
+    public static string ElementNameSequence { get; } = "sequence";
 
     public string[] AdditionalElementNames =>
-        new[] { ElementNameEventName, ElementNameThreadName, ElementNameSeverity };
+        new[] { ElementNameEventName, ElementNameThreadName, ElementNameSeverity, ElementNameSequence };
 
     public string[] AllElementNames => OfficialElementNames.Concat(AdditionalElementNames).ToArray();
 
