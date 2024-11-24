@@ -69,74 +69,67 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
         TextWriter textWriter)
     {
         var message = logEntry.Formatter(logEntry.State, logEntry.Exception);
-        if (logEntry.Exception == null && message == null)
-        {
-            return;
-        }
+
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract 
+        if (logEntry.Exception == null && message == null) return;
 
         if (s_writtenNames is { } nonNull)
-        {
             nonNull.Clear();
-        }
         else
-        {
             s_writtenNames = new HashSet<string>(32, StringComparer.Ordinal);
-        }
 
         const int DefaultBufferSize = 1024;
-        using (var output = new PooledByteBufferWriter(DefaultBufferSize))
+        using var output = new PooledByteBufferWriter(DefaultBufferSize);
+        using var writer = new Utf8JsonWriter(output, FormatterOptions.JsonWriterOptions);
+        
+        writer.WriteStartObject();
+
+        // we ignore the TimestampFormat option, one could check for TimestampFormat == "O"
+        writer.WriteString("@timestamp"u8,
+            FormatterOptions.UseUtcTimestamp ? _timeProvider.GetUtcNow() : _timeProvider.GetLocalNow());
+
+        writer.WriteString("level"u8, GetLogLevelString(logEntry.LogLevel));
+
+        writer.WriteString("logger"u8, logEntry.Category);
+
+
+
+        writer.WriteString("message"u8, message);
+
+
+        if (logEntry.EventId.Id > 0)
+            writer.WriteNumber("eventId"u8, logEntry.EventId.Id);
+
+        if (!string.IsNullOrEmpty(logEntry.EventId.Name))
+            writer.WriteString("eventName"u8, logEntry.EventId.Name);
+
+        writer.WriteNumber("severity"u8, GetOpenTelemetrySeverity(logEntry.LogLevel));
+
+        if (logEntry.Exception != null)
+            writer.WriteString("exception"u8, logEntry.Exception.ToString());
+
+        if (FormatterOptions.IncludeThreadName)
         {
-            using (var writer = new Utf8JsonWriter(output, FormatterOptions.JsonWriterOptions))
-            {
-                writer.WriteStartObject();
-
-                // we ignore the TimestampFormat option, one could check for TimestampFormat == "O"
-                writer.WriteString("@timestamp"u8,
-                    FormatterOptions.UseUtcTimestamp ? _timeProvider.GetUtcNow() : _timeProvider.GetLocalNow());
-
-                writer.WriteString("level"u8, GetLogLevelString(logEntry.LogLevel));
-
-                writer.WriteString("logger"u8, logEntry.Category);
-
-                if (FormatterOptions.IncludeThreadName)
-                {
-                    writer.WriteString("thread_name"u8, Thread.CurrentThread.Name);
-                    s_writtenNames.Add("thread_name");
-                }
-
-                writer.WriteString("message"u8, message);
-
-
-                if (logEntry.EventId.Id > 0)
-                    writer.WriteNumber("eventId"u8, logEntry.EventId.Id);
-
-                if (!string.IsNullOrEmpty(logEntry.EventId.Name))
-                    writer.WriteString("eventName"u8, logEntry.EventId.Name);
-
-                writer.WriteNumber("severity"u8, GetOpenTelemetrySeverity(logEntry.LogLevel));
-
-                if (logEntry.Exception != null)
-                    writer.WriteString("exception"u8, logEntry.Exception.ToString());
-
-
-                // we handle scopes first, so that these attribute names remain stable(ish)
-                AddScopeInformation(writer, scopeProvider, s_writtenNames);
-
-                if (logEntry.State is IReadOnlyCollection<KeyValuePair<string, object?>> stateProperties)
-                {
-                    foreach (var (key, value) in stateProperties)
-                    {
-                        if (key != "{OriginalFormat}")
-                            WriteItem(writer, GetCamelCasedUniqueKey(key, s_writtenNames), value);
-                    }
-                }
-
-                writer.WriteEndObject();
-                writer.Flush();
-            }
-
-            textWriter.Write(Encoding.UTF8.GetString(output.WrittenMemory.Span));
+            writer.WriteString("thread_name"u8, Thread.CurrentThread.Name);
+            s_writtenNames.Add("thread_name");
         }
+
+        // we handle scopes first so that these attribute names remain stable(ish)
+        AddScopeInformation(writer, scopeProvider, s_writtenNames);
+
+        if (logEntry.State is IReadOnlyCollection<KeyValuePair<string, object?>> stateProperties)
+        {
+            foreach (var (key, value) in stateProperties)
+            {
+                if (key != "{OriginalFormat}")
+                    WriteItem(writer, GetCamelCasedUniqueKey(key, s_writtenNames), value);
+            }
+        }
+
+        writer.WriteEndObject();
+        writer.Flush();
+
+        textWriter.Write(Encoding.UTF8.GetString(output.WrittenMemory.Span));
 
         textWriter.Write(Environment.NewLine);
     }
