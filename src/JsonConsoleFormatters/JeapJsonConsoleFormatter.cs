@@ -92,20 +92,10 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
 
         writer.WriteString("logger"u8, logEntry.Category);
 
-
         writer.WriteString("message"u8, message);
-
-
-        if (logEntry.EventId.Id > 0)
-            writer.WriteNumber("eventId"u8, logEntry.EventId.Id);
 
         if (!string.IsNullOrEmpty(logEntry.EventId.Name))
             writer.WriteString("eventName"u8, logEntry.EventId.Name);
-
-        writer.WriteNumber("severity"u8, GetOpenTelemetrySeverity(logEntry.LogLevel));
-
-        if (logEntry.Exception != null)
-            writer.WriteString("exception"u8, logEntry.Exception.ToString());
 
         // we handle scopes first so that these attribute names remain stable(ish)
         AddScopeInformation(writer, scopeProvider, s_writtenNames, FormatterOptions);
@@ -119,10 +109,20 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
             }
         }
 
+        // all fields more relevant for filtering but not human reading 
+
+        writer.WriteNumber("severity"u8, GetOpenTelemetrySeverity(logEntry.LogLevel));
+
         if (FormatterOptions.IncludeThreadName)
-        {
             writer.WriteString("thread_name"u8, Thread.CurrentThread.Name);
-        }
+
+        if (logEntry.EventId.Id > 0)
+            writer.WriteNumber("eventId"u8, logEntry.EventId.Id);
+
+        // exceptions have long stack traces, so we put them last
+        if (logEntry.Exception != null)
+            writer.WriteString("exception"u8, logEntry.Exception.ToString());
+
 
         writer.WriteEndObject();
         writer.Flush();
