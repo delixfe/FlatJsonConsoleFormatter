@@ -127,7 +127,7 @@ public abstract class
 
     [Theory]
     [MemberData(nameof(Data.SpecialCaseValues), MemberType = typeof(Data))]
-    public void Log_StateAndScopeContainsSpecialCaseValue_SerializesValueAsExpected(object value,
+    public void Log_StateAndScopeContainsSpecialCaseValue_SerializesValueAsExpected(object? value,
         string expectedJsonValue)
     {
         // Arrange
