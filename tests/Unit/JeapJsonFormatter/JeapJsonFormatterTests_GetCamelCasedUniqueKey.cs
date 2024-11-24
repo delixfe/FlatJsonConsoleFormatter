@@ -15,7 +15,8 @@ public class
         var writtenNames = new HashSet<string>();
 
         // Act
-        var actual = JeapJsonConsoleFormatter.GetCamelCasedUniqueKey(key, writtenNames);
+        var actual =
+            JeapJsonConsoleFormatter.GetCamelCasedUniqueKey(key, writtenNames, new JeapJsonConsoleFormatterOptions());
 
         // Assert
         actual.Should().Be(expected);
@@ -36,7 +37,9 @@ public class
         // Act
         for (var i = 0; i < 101; i++)
         {
-            var uniqueKey = JeapJsonConsoleFormatter.GetCamelCasedUniqueKey(key, writtenNames);
+            var uniqueKey =
+                JeapJsonConsoleFormatter.GetCamelCasedUniqueKey(key, writtenNames,
+                    new JeapJsonConsoleFormatterOptions());
             actual.Add(uniqueKey);
         }
 
@@ -72,7 +75,8 @@ public class
         // Act
         for (var i = 0; i < 101; i++)
         {
-            var uniqueKey = JeapJsonConsoleFormatter.GetCamelCasedUniqueKey(reservedKey, writtenNames);
+            var uniqueKey = JeapJsonConsoleFormatter.GetCamelCasedUniqueKey(reservedKey, writtenNames,
+                new JeapJsonConsoleFormatterOptions());
             actual.Add(uniqueKey);
         }
 
@@ -82,5 +86,33 @@ public class
         actual[2].Should().Be($"{camelCasedKey}_3");
         actual[11].Should().Be($"{camelCasedKey}_12");
         actual[100].Should().Be($"{camelCasedKey}_101");
+    }
+
+    [Fact]
+    public void ThreadName_IncludeThreadName_Enabled_IsSuffixed()
+    {
+        // Arrange
+        var options = new JeapJsonConsoleFormatterOptions { IncludeThreadName = true };
+        var writtenNames = new HashSet<string>();
+
+        // Act
+        var actual = JeapJsonConsoleFormatter.GetCamelCasedUniqueKey("thread_name", writtenNames, options);
+
+        // Assert
+        actual.Should().Be("thread_name_1");
+    }
+
+    [Fact]
+    public void ThreadName_IncludeThreadName_Disabled_IsNotSuffixed()
+    {
+        // Arrange
+        var options = new JeapJsonConsoleFormatterOptions { IncludeThreadName = false };
+        var writtenNames = new HashSet<string>();
+
+        // Act
+        var actual = JeapJsonConsoleFormatter.GetCamelCasedUniqueKey("thread_name", writtenNames, options);
+
+        // Assert
+        actual.Should().Be("thread_name");
     }
 }

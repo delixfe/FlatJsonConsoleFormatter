@@ -81,17 +81,16 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
         const int DefaultBufferSize = 1024;
         using var output = new PooledByteBufferWriter(DefaultBufferSize);
         using var writer = new Utf8JsonWriter(output, FormatterOptions.JsonWriterOptions);
-        
+
         writer.WriteStartObject();
 
-        // we ignore the TimestampFormat option, one could check for TimestampFormat == "O"
+        // we ignore the TimestampFormat option, as we always use ISO8601 (DateTimeOffset.ToString("O"))
         writer.WriteString("@timestamp"u8,
             FormatterOptions.UseUtcTimestamp ? _timeProvider.GetUtcNow() : _timeProvider.GetLocalNow());
 
         writer.WriteString("level"u8, GetLogLevelString(logEntry.LogLevel));
 
         writer.WriteString("logger"u8, logEntry.Category);
-
 
 
         writer.WriteString("message"u8, message);
@@ -108,22 +107,21 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
         if (logEntry.Exception != null)
             writer.WriteString("exception"u8, logEntry.Exception.ToString());
 
-        if (FormatterOptions.IncludeThreadName)
-        {
-            writer.WriteString("thread_name"u8, Thread.CurrentThread.Name);
-            s_writtenNames.Add("thread_name");
-        }
-
         // we handle scopes first so that these attribute names remain stable(ish)
-        AddScopeInformation(writer, scopeProvider, s_writtenNames);
+        AddScopeInformation(writer, scopeProvider, s_writtenNames, FormatterOptions);
 
         if (logEntry.State is IReadOnlyCollection<KeyValuePair<string, object?>> stateProperties)
         {
             foreach (var (key, value) in stateProperties)
             {
                 if (key != "{OriginalFormat}")
-                    WriteItem(writer, GetCamelCasedUniqueKey(key, s_writtenNames), value);
+                    WriteItem(writer, GetCamelCasedUniqueKey(key, s_writtenNames, FormatterOptions), value);
             }
+        }
+
+        if (FormatterOptions.IncludeThreadName)
+        {
+            writer.WriteString("thread_name"u8, Thread.CurrentThread.Name);
         }
 
         writer.WriteEndObject();
@@ -134,7 +132,7 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
         textWriter.Write(Environment.NewLine);
     }
 
-    private static bool IsReservedKey(string key) => key switch
+    private static bool IsReservedKey(string key, JeapJsonConsoleFormatterOptions options) => key switch
     {
         "@timestamp" => true,
         "level" => true,
@@ -145,6 +143,7 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
         // additional properties
         "severity" => true,
         "eventName" => true,
+        "thread_name" => options.IncludeThreadName,
         _ => false
     };
 
@@ -183,11 +182,10 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
         throw new ArgumentOutOfRangeException(paraName, logLevel,
             $"{nameof(LogLevel)} does not contain a value for {logLevel}");
 
-    private void AddScopeInformation(Utf8JsonWriter writer, IExternalScopeProvider? scopeProvider,
-        HashSet<string> writtenNames)
+    private static void AddScopeInformation(Utf8JsonWriter writer, IExternalScopeProvider? scopeProvider,
+        HashSet<string> writtenNames, JeapJsonConsoleFormatterOptions options)
     {
-        if (!FormatterOptions.IncludeScopes || scopeProvider == null)
-            return;
+        if (!options.IncludeScopes || scopeProvider == null) return;
         var scopeNum = 0;
         scopeProvider.ForEachScope((scope, _) =>
         {
@@ -195,33 +193,35 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
             {
                 foreach (var item in scopeItems)
                 {
-                    WriteItem(writer, GetCamelCasedUniqueKey(item.Key, writtenNames), item.Value);
+                    WriteItem(writer, GetCamelCasedUniqueKey(item.Key, writtenNames, options), item.Value);
                 }
             }
             else
             {
                 // TODO: always output if scope messages are enabled
-                WriteItem(writer, GetCamelCasedUniqueKey($"scope_{scopeNum}", writtenNames), ToInvariantString(scope));
+                WriteItem(writer, GetCamelCasedUniqueKey($"scope_{scopeNum}", writtenNames, options),
+                    ToInvariantString(scope));
             }
 
             scopeNum += 1;
         }, writer);
     }
 
-    internal static string GetCamelCasedUniqueKey(string key, HashSet<string> writtenNames)
+    internal static string GetCamelCasedUniqueKey(string key, HashSet<string> writtenNames,
+        JeapJsonConsoleFormatterOptions options)
     {
         // TODO(perf): cache mapped keys
         key = JsonCamelCaseNamingPolicy.ConvertName(key);
         var result = key;
 
-        if (IsReservedKey(key) || writtenNames.Contains(key))
+        if (IsReservedKey(key, options) || writtenNames.Contains(key))
         {
             var index = 0;
             do
             {
                 index += 1;
                 result = $"{key}_{index}";
-            } while (writtenNames.Contains(result) || IsReservedKey(result));
+            } while (writtenNames.Contains(result) || IsReservedKey(result, options));
         }
 
         writtenNames.Add(result);
