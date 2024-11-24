@@ -3,6 +3,7 @@ using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Exporters;
 using BenchmarkDotNet.Exporters.Json;
+using BenchmarkDotNet.Filters;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Loggers;
 using BenchmarkDotNet.Reports;
@@ -32,6 +33,9 @@ public class ReleaseConfig : ManualConfig
         AddExporter(MarkdownExporter.GitHub, JsonExporter.Full, HtmlExporter.Default);
 
         AddLogger(ConsoleLogger.Unicode);
+
+        // ignore FlatJson benchmarks
+        AddFilter(new NameFilter(name => !name.StartsWith("Flat")));
 
         WithOption(ConfigOptions.StopOnFirstError, true);
 
