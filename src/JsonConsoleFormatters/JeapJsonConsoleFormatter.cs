@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -132,7 +133,17 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
         writer.WriteEndObject();
         writer.Flush();
 
-        textWriter.Write(Encoding.UTF8.GetString(output.WrittenMemory.Span));
+        var messageBytes = output.WrittenMemory.Span;
+        var logMessageBuffer = ArrayPool<char>.Shared.Rent(Encoding.UTF8.GetMaxCharCount(messageBytes.Length));
+        try
+        {
+            var charsWritten = Encoding.UTF8.GetChars(messageBytes, logMessageBuffer);
+            textWriter.Write(logMessageBuffer, 0, charsWritten);
+        }
+        finally
+        {
+            ArrayPool<char>.Shared.Return(logMessageBuffer);
+        }
 
         textWriter.Write(Environment.NewLine);
     }
@@ -192,7 +203,7 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
     {
         if (!options.IncludeScopes || scopeProvider == null) return;
         var scopeNum = 0;
-        scopeProvider.ForEachScope((scope, _) =>
+        scopeProvider.ForEachScope((scope, _) => // this captures writtenNames
         {
             if (scope is IEnumerable<KeyValuePair<string, object>> scopeItems)
             {
