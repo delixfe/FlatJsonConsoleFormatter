@@ -71,11 +71,28 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
     public override void Write<TState>(in LogEntry<TState> logEntry, IExternalScopeProvider? scopeProvider,
         TextWriter textWriter)
     {
-        var message = logEntry.Formatter(logEntry.State, logEntry.Exception);
+        var exception = logEntry.Exception;
+        var message = logEntry.Formatter(logEntry.State, exception);
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract 
-        if (logEntry.Exception == null && message == null) return;
+        if (exception == null && message == null) return;
 
+        var logLevel = logEntry.LogLevel;
+        var category = logEntry.Category;
+        var eventId = logEntry.EventId;
+        var stateProperties = logEntry.State as IReadOnlyCollection<KeyValuePair<string, object?>>;
+
+        // We extract most of the work into a non-generic method to save code size.
+        // If this was left in the generic method, we'd get generic specialization for all TState parameters,
+        // but that's unnecessary.
+
+        WriteInternal(scopeProvider, textWriter, logLevel, category, message, eventId, stateProperties, exception);
+    }
+
+    private void WriteInternal(IExternalScopeProvider? scopeProvider, TextWriter textWriter, LogLevel logLevel,
+        string category, string message, EventId eventId,
+        IReadOnlyCollection<KeyValuePair<string, object?>>? stateProperties, Exception? exception)
+    {
         s_writtenNames ??= new HashSet<string>(32, StringComparer.Ordinal);
         s_writtenNames.Clear();
 
@@ -89,19 +106,20 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
         writer.WriteString("@timestamp"u8,
             FormatterOptions.UseUtcTimestamp ? _timeProvider.GetUtcNow() : _timeProvider.GetLocalNow());
 
-        writer.WriteString("level"u8, GetLogLevelString(logEntry.LogLevel));
+        writer.WriteString("level"u8, GetLogLevelString(logLevel));
 
-        writer.WriteString("logger"u8, logEntry.Category);
+        writer.WriteString("logger"u8, category);
 
         writer.WriteString("message"u8, message);
 
-        if (!string.IsNullOrEmpty(logEntry.EventId.Name))
-            writer.WriteString("eventName"u8, logEntry.EventId.Name);
+        if (!string.IsNullOrEmpty(eventId.Name))
+            writer.WriteString("eventName"u8, eventId.Name);
 
         // we handle scopes first so that these attribute names remain stable(ish)
         AddScopeInformation(writer, scopeProvider, s_writtenNames, FormatterOptions);
 
-        if (logEntry.State is IReadOnlyCollection<KeyValuePair<string, object?>> stateProperties)
+
+        if (stateProperties != null)
         {
             foreach (var (key, value) in stateProperties)
             {
@@ -112,7 +130,7 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
 
         // all fields more relevant for filtering but not human reading 
 
-        writer.WriteNumber("severity"u8, GetOpenTelemetrySeverity(logEntry.LogLevel));
+        writer.WriteNumber("severity"u8, GetOpenTelemetrySeverity(logLevel));
 
         if (FormatterOptions.IncludeSequence)
             writer.WriteNumber("sequence"u8, Interlocked.Increment(ref _sequence));
@@ -120,12 +138,12 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
         if (FormatterOptions.IncludeThreadName)
             writer.WriteString("thread_name"u8, Thread.CurrentThread.Name);
 
-        if (logEntry.EventId.Id > 0)
-            writer.WriteNumber("eventId"u8, logEntry.EventId.Id);
+        if (eventId.Id > 0)
+            writer.WriteNumber("eventId"u8, eventId.Id);
 
         // exceptions have long stack traces, so we put them last
-        if (logEntry.Exception != null)
-            writer.WriteString("exception"u8, logEntry.Exception.ToString());
+        if (exception != null)
+            writer.WriteString("exception"u8, exception.ToString());
 
 
         writer.WriteEndObject();
