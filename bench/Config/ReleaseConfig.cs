@@ -17,11 +17,11 @@ public class ReleaseConfig : ManualConfig
         AddDefaults();
         AddJob(Job.Default
                 .WithMinIterationCount(15)
-                .WithMaxIterationCount(100) // we don't want to run more that 100 iterations
-                .DontEnforcePowerPlan() // make sure BDN does not try to enforce High Performance power plan on Windows
+                .WithMaxIterationCount(100) // we don't want to run more than 100 iterations
+                .DontEnforcePowerPlan() // make sure BDN does not try to enforce the High Performance power plan on Windows
                 .WithGcServer(true)
                 .WithUnrollFactor(
-                    1024 * 8) // we need to reach 100ms of execution time, unrolling is the easiest way to do it
+                    1024 * 8) // we need to reach 100 ms of execution time; unrolling is the easiest way to do it
         );
 
         AddColumn(StatisticColumn.Median, StatisticColumn.Min, StatisticColumn.Max,
