@@ -274,7 +274,11 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
                 writer.WriteNumber(key, sbyteValue);
                 break;
             case char charValue:
+#if NET
                 writer.WriteString(key, MemoryMarshal.CreateSpan(ref charValue, 1));
+#else
+                writer.WriteString(key, charValue.ToString());
+#endif
                 break;
             case decimal decimalValue:
                 writer.WriteNumber(key, decimalValue);
