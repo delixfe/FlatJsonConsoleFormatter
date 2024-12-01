@@ -1,4 +1,4 @@
-﻿using System.Buffers;
+using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.InteropServices;
@@ -76,10 +76,8 @@ public sealed class JeapJsonConsoleFormatter : ConsoleFormatter, IDisposable
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract 
         if (logEntry.Exception == null && message == null) return;
 
-        if (s_writtenNames is { } nonNull)
-            nonNull.Clear();
-        else
-            s_writtenNames = new HashSet<string>(32, StringComparer.Ordinal);
+        s_writtenNames ??= new HashSet<string>(32, StringComparer.Ordinal);
+        s_writtenNames.Clear();
 
         const int DefaultBufferSize = 1024;
         using var output = new PooledByteBufferWriter(DefaultBufferSize);
