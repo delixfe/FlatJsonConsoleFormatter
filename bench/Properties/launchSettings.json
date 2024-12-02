@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Benchmarks": {
+      "commandName": "Project"
+    },
+    "Benchmarks (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
