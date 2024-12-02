@@ -480,3 +480,6 @@ $RECYCLE.BIN/
 
 # BenchmarkDotNet artifacts
 bench/BenchmarkDotNet.Artifacts/
+
+# VS 2022 remote test environments configuration file
+testEnvironments.json
