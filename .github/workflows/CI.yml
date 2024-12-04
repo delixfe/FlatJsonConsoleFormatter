@@ -26,6 +26,8 @@ jobs:
         run: dotnet build build/build.csproj -c Release --nologo -v m
       - name: 'run build'
         run: dotnet run --project build/build.csproj -c Release --no-build -- pack
+        env:
+          NuGetApiKey: ${{ secrets.NUGET_API_KEY }}
       - name: 'publish: test-results'
         uses: actions/upload-artifact@v4
         with:

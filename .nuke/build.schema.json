@@ -26,6 +26,7 @@
       "enum": [
         "Compile",
         "Pack",
+        "Push",
         "Restore",
         "Test"
       ]
@@ -108,9 +109,19 @@
             "Release"
           ]
         },
+        "GitHubToken": {
+          "type": "string",
+          "description": "GitHub API token",
+          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
+        },
         "IgnoreFailedSources": {
           "type": "boolean",
           "description": "Ignore unreachable sources during Restore"
+        },
+        "NuGetApiKey": {
+          "type": "string",
+          "description": "Nuget API key",
+          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
         },
         "Solution": {
           "type": "string",

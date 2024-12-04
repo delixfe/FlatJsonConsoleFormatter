@@ -19,10 +19,12 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 [SuppressMessage("ReSharper", "AllUnderscoreLocalParameterName")]
 partial class Build : NukeBuild
 {
-    const int DegreeOfParallelism = 10;
+    const int DegreeOfParallelism = 3; // we have 4 cores on the build server
 
 
     [Parameter] readonly Configuration Configuration;
+
+    [Secret] [Parameter("GitHub API token")] [CanBeNull] readonly string GitHubToken;
 
     [CI] [CanBeNull] readonly GitHubActions GitHubActions;
 
@@ -30,6 +32,7 @@ partial class Build : NukeBuild
     [GitRepository] [Required] readonly GitRepository GitRepository;
     [Parameter("Ignore unreachable sources during " + nameof(Restore))] readonly bool IgnoreFailedSources;
 
+    [Parameter("Nuget API key")] [Secret] readonly string NuGetApiKey;
 
     [MinVer] [Required] readonly MinVer MinVer;
 
@@ -162,5 +165,28 @@ partial class Build : NukeBuild
                 .AddPair("Packages", PackagesDirectory.GlobFiles("*.nupkg").Count.ToString()));
         });
 
+    Target Push => _ => _
+        .DependsOn(Pack)
+        // .Requires(() => GitHubActions)
+        .Requires(() => Configuration.Equals(Configuration.Release))
+        .Requires(() => NuGetApiKey)
+        .Executes(() =>
+        {
+            var packages = PackagesDirectory.GlobFiles("JsonConsoleFormatters*.nupkg");
+
+            Assert.NotEmpty(packages);
+
+            DotNetNuGetPush(_ => _
+                .SetSource("https://api.nuget.org/v3/index.json")
+                .SetApiKey(NuGetApiKey)
+                .SetSkipDuplicate(true)
+                .CombineWith(
+                    packages, (_, v) => _
+                        .SetTargetPath(v)
+                )
+            );
+        });
+    
+    
     public static int Main() => Execute<Build>(x => x.Pack);
 }
