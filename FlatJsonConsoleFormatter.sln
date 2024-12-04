@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unit", "tests\Unit\Unit.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonConsoleFormatters", "src\JsonConsoleFormatters\JsonConsoleFormatters.csproj", "{CFD5BB46-52EB-4599-8820-5A83DBF3A7F0}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "build", "build\build.csproj", "{4F3831F5-E826-4183-A935-8EC5C306C9CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,6 +24,8 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4F3831F5-E826-4183-A935-8EC5C306C9CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F3831F5-E826-4183-A935-8EC5C306C9CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EA54A0A-2A00-4F15-BA28-F3AA9B6494C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6EA54A0A-2A00-4F15-BA28-F3AA9B6494C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EA54A0A-2A00-4F15-BA28-F3AA9B6494C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
